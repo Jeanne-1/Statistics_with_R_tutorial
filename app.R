@@ -4,6 +4,17 @@ library(DT)
 library(Epi)
 library(psych)
 
+generate_reactive_string <- function(valid_expr, default_expr) {
+  reactive({
+    if (!is.null(df_name())) {
+      valid_expr
+    } else {
+      default_expr # Valeur par défaut si df_name() est NULL
+    }
+  })
+}
+
+
 ui <- page_fluid(
   titlePanel("Statistics with R for begginers"),
   
@@ -15,7 +26,7 @@ ui <- page_fluid(
     col_width=2,
     card(
       # Zone de saisie pour entrer du code
-      textAreaInput("code_input", "Type your code here :", rows = 1),
+      uiOutput("code_input_ui"),
       
       # Affichage de la "console"
       verbatimTextOutput("console_output"),
@@ -67,49 +78,105 @@ server <- function(input, output, session) {
         T
       },
       # pas de validation. A terme, demander qch sur ces fonctions, genre le sd, la première valeur, etc dans un QCM
-      conclusion = "Have you seen the difference between these functions ?"
+      conclusion = "Have you seen the difference between these functions ?",
+      solution = "head(data)"
     ),
     list(
       instruction = "🔹 How many features do you have for age ? Stock the value in tot.",
-      explanations = "You can have age with the formula data$age",
+      explanations = "Little reminder: you can catch age with the formula data$age.",
       validation = function() {
         if (!"tot" %in% ls(envir = .GlobalEnv)) return(FALSE)  # Vérifie si 'tot' existe
         value <- get("tot", envir = .GlobalEnv)  # Récupère la valeur de 'tot'
         return(is.numeric(value) && value == 748)  # Vérifie si c'est un nombre et vaut 748
       },
-      solution = "tot <- sum(table(data$age))",
+      solution = generate_reactive_string(
+        valid_expr = paste0("tot <- sum(table(", df_name(), "$age))"), 
+        default_expr = "tot <- sum(table(data$age))"
+        ),
       conclusion = "There are as many values for age than there are for the dataset. Which information does it give you ?"
-    ),
-    list(
-      instruction = "🔹 Draw a histogram of age.",
-      validation = function() {
-        grepl(paste0("hist\\(", df_name(), "\\$age\\)"), input$code_input)
-      },
-      solution = reactive({
-        if (!is.null(df_name())) {
-          paste0("hist(", df_name(), "$age)")
-        } else {
-          "hist(data$age)"  # Valeur par défaut si df_name() est NULL
-        }
-      }),
-      conclusion = "Looking at the histogram can give clue about wether the variable follows or not a normal distribution. What do you think ? \n"
     ),
     list(
       instruction = "🔹 What is the mean of age ?",
       validation = function() {
-        T
+        # AJOUTER UNE VERIFICATION DE TYPE
+        if (is.null(df_name())) return(FALSE)
+        expected_value <- mean(get(df_name(), envir = .GlobalEnv)$age, na.rm = TRUE) # calcul de la moyenne
+        
+        # Capture et évalue la sortie utilisateur
+        tryCatch({
+          user_value <- eval(parse(text = input$code_input), envir = .GlobalEnv)
+          
+          if (is.numeric(user_value) && !is.na(user_value)) {  # Vérifie si c'est bien un nombre
+            return(abs(user_value - expected_value) < 1e-6)  # Vérifie si la valeur est proche de la vraie valeur
+          } else {
+            return(FALSE)
+          }
+        }, error = function(e) {
+          return(FALSE)  # Retourne FALSE si une erreur survient
+        })
       },
-      solution = reactive({
-        if (!is.null(df_name())) {
-          paste0("mean(", df_name(), "$age)")
-        } else {
-          "mean(data$age)"  # Valeur par défaut si df_name() est NULL
+      solution = generate_reactive_string(
+        valid_expr = paste0("mean(", df_name(), "$age)"),
+        default_expr = "mean(data$age)"
+      ),
+      conclusion = {
+        "If you didn't do so, you can add the option na.rm = T which allows to calculate the mean if some data was missing.
+        You can also check standard deviation with sd(). 
+        Now we know the mean of the age of the 748 people that conduct the study. 
+        But what about the mean age of our global population ? \n"
         }
-      }),
-      conclusion = "You can also check standard deviation with sd(). Now we know the mean of the age of the 748 people that conduct the study. But what about the mean age of our global population ?"
     ),
     list(
-      instruction = "🔹 **Step 6** : What is the mean of age of our global population ?"
+      instruction = "🔹 What is the mean of age of our global population ?",
+      explanations = "Find the 95% confidence interval.",
+      validation = function() {
+        if (is.null(df_name())) return(FALSE)
+        T
+        # A COMPLETER
+      },
+      solution = generate_reactive_string(
+        valid_expr = paste0("mean(", df_name(), "$age)-1.96*sd(", df_name(), "$age)/sqrt(tot), mean(", df_name(), "$age)+1.96*sd(", df_name(), "$age)/sqrt(tot)"),
+        default_expr = "mean(data$age)-1.96*sd(data$age)/sqrt(tot), mean(data$age)+1.96*sd(data$age)/sqrt(tot)"
+        ),
+      conclusion = "What does it mean ? It means that the global mean of the population is 95% likely to be in between these 2 values."
+    ),
+    list(
+      instruction = "🔹 Draw a histogram of age.",
+      validation = function() {
+        if (is.null(df_name())) return(F)
+        grepl(paste0("hist\\(", df_name(), "\\$age\\)"), input$code_input)
+      },
+      solution = generate_reactive_string(
+        valid_expr = paste0("hist(", df_name(), "$age)"),
+        default_expr = "hist(data$age)"
+      ),
+      conclusion = "Looking at the histogram can give you a clue wether the variable follows a normal distribution or not. What do you think ? \n"
+    ),
+    list(
+      instruction = "🔹 Display the percentage of people that had depression in May.",
+      explanations = "That is with Mai_depression==3",
+      validation = function() {
+        if (is.null(df_name())) return(FALSE)
+        grepl(paste0("prop.table(table(", df_name(), "$Mai_depression==3)"), input$code_input)
+      },
+      solution = generate_reactive_string(
+        valid_expr = paste0("prop.table(table(", df_name(), "$Mai_depression==3))*100"),
+        default_expr = "prop.table(table(data$Mai_depression==3))*100"
+      )
+    ),
+    list(
+      instruction = "🔹 Let's create a binary variable, Mai_depression.b.",
+      explanations = "To conduct tests on percentages, we need binary variables. Put the threshold at 1.5.",
+      validation = function() {
+        if (is.null(df_name())) return(FALSE)
+        var_name <- paste0(df_name(), "$Mai_depression.b")
+        if (!exists(var_name, envir = .GlobalEnv)) return(FALSE)  # Vérifie si Mai_depression.b existe
+        grepl("Mai_depression\\s*[>=]\\s*1\\.?5?", input$code_input) # Vérifie si le threshold est bien mis
+      },
+      solution = generate_reactive_string(
+        valid_expr = paste0(df_name(), "$Mai_depression.b <- ifelse(", df_name(), "$Mai_depression >= 2, 1, 0)"),
+        default_expr = "data$Mai_depression.b <- ifelse(data$Mai_depression >= 2, 1, 0)"
+      )
     )
   )
   
@@ -134,9 +201,16 @@ server <- function(input, output, session) {
     }
   })
   
+  output$code_input_ui <- renderUI({
+    step <- current_step()
+    rows <- ifelse(step == 5, 2, 1)  # Change X par le numéro de l'étape où il faut plus de place
+    textAreaInput("code_input", "Type your code here :", rows = rows)
+  })
+  
   # Affichage type "console"
   output$console_output <- renderText({
-    paste0("> ", input$code_input)
+    code_lines <- unlist(strsplit(input$code_input, "\n"))  # Sépare par lignes
+    paste0("> ", code_lines, collapse = "\n")  # Ajoute ">" à chaque ligne
   })
   
   # Exécution du code utilisateur
@@ -152,9 +226,28 @@ server <- function(input, output, session) {
     # Test du code utilisateur
     tryCatch({
       
-      output_capture <- capture.output({
-        eval(parse(text = user_code), envir = .GlobalEnv)
-        })
+      # Séparer le code en plusieurs lignes
+      lines <- unlist(strsplit(user_code, "\n"))
+      all_output <- c()  # Stocke toutes les sorties
+      
+      for (line in lines) {
+        if (nchar(trimws(line)) > 0) {  # Ignore les lignes vides
+      result <- tryCatch({
+        eval(parse(text = line), envir = .GlobalEnv)
+      }, error = function(e) {
+        paste("🚨 Erreur :", e$message)
+      })
+      
+      line_output <- capture.output(print(result))  # Affiche la sortie explicite
+      
+      all_output <- c(all_output, paste("> ", line), line_output, "")  # Ajoute une ligne vide entre chaque commande
+    }
+      }
+      
+      # Affichage du résultat
+      output$execution_output <- renderText({
+        paste(all_output, collapse = "\n")
+      })
       
       # Vérifier si le code contient un appel à une fonction de plot
       if (grepl("\\bplot\\b|\\bhist\\b|\\bggplot\\b|\\bboxplot\\b", user_code)) {
@@ -164,11 +257,6 @@ server <- function(input, output, session) {
       } else {
         output$user_plot <- renderPlot(NULL)  # Efface le graphique si aucun plot
       }
-      
-      # Affichage du résultat
-      output$execution_output <- renderText({
-        paste(output_capture, collapse = "\n")
-      })
       
       # Vérification de la réponse
       if (validation_fn()) {
@@ -185,7 +273,7 @@ server <- function(input, output, session) {
       }
       
     }, error = function(e) {
-      output$execution_output <- renderText("")  # Effacer la sortie
+      #output$execution_output <- renderText("")  # Effacer la sortie
       output$feedback <- renderText(paste("🚨 Erreur dans le code :", e$message))
     })
   })
