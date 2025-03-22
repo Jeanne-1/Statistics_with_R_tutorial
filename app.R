@@ -90,7 +90,7 @@ server <- function(input, output, session) {
         return(is.numeric(value) && value == 748)  # Vérifie si c'est un nombre et vaut 748
       },
       solution = generate_reactive_string(
-        valid_expr = paste0("tot <- sum(table(", df_name(), "$age))"), 
+        valid_expr = paste0("tot <- sum(table(", df_name(), "$age))"),
         default_expr = "tot <- sum(table(data$age))"
         ),
       conclusion = "There are as many values for age than there are for the dataset. Which information does it give you ?"
@@ -101,11 +101,11 @@ server <- function(input, output, session) {
         # AJOUTER UNE VERIFICATION DE TYPE
         if (is.null(df_name())) return(FALSE)
         expected_value <- mean(get(df_name(), envir = .GlobalEnv)$age, na.rm = TRUE) # calcul de la moyenne
-        
+
         # Capture et évalue la sortie utilisateur
         tryCatch({
           user_value <- eval(parse(text = input$code_input), envir = .GlobalEnv)
-          
+
           if (is.numeric(user_value) && !is.na(user_value)) {  # Vérifie si c'est bien un nombre
             return(abs(user_value - expected_value) < 1e-6)  # Vérifie si la valeur est proche de la vraie valeur
           } else {
@@ -121,8 +121,8 @@ server <- function(input, output, session) {
       ),
       conclusion = {
         "If you didn't do so, you can add the option na.rm = T which allows to calculate the mean if some data was missing.
-        You can also check standard deviation with sd(). 
-        Now we know the mean of the age of the 748 people that conduct the study. 
+        You can also check standard deviation with sd().
+        Now we know the mean of the age of the 748 people that conduct the study.
         But what about the mean age of our global population ? \n"
         }
     ),
@@ -150,33 +150,56 @@ server <- function(input, output, session) {
         valid_expr = paste0("hist(", df_name(), "$age)"),
         default_expr = "hist(data$age)"
       ),
-      conclusion = "Looking at the histogram can give you a clue wether the variable follows a normal distribution or not. What do you think ? \n"
+      conclusion = "Looking at the histogram can give you a clue whether the variable follows a normal distribution or not. What do you think ? \n"
     ),
     list(
       instruction = "🔹 Display the percentage of people that had depression in May.",
       explanations = "That is with Mai_depression==3",
       validation = function() {
         if (is.null(df_name())) return(FALSE)
-        grepl(paste0("prop.table(table(", df_name(), "$Mai_depression==3)"), input$code_input)
+        grepl(paste0("prop\\.table\\(table\\(", df_name(), "\\$Mai_depression\\s*==\\s*3\\)\\)\\s*\\*\\s*100"), input$code_input)
       },
-      solution = generate_reactive_string(
-        valid_expr = paste0("prop.table(table(", df_name(), "$Mai_depression==3))*100"),
-        default_expr = "prop.table(table(data$Mai_depression==3))*100"
-      )
+      solution = "prop.table(table(data$Mai_depression==3))*100" # CORRIGER CA
+      #   generate_reactive_string(
+      #   valid_expr = paste0("prop.table(table(", df_name(), "$Mai_depression==3))*100"),
+      #   default_expr = "prop.table(table(data$Mai_depression==3))*100"
+      # )
     ),
     list(
       instruction = "🔹 Let's create a binary variable, Mai_depression.b.",
       explanations = "To conduct tests on percentages, we need binary variables. Put the threshold at 1.5.",
       validation = function() {
         if (is.null(df_name())) return(FALSE)
-        var_name <- paste0(df_name(), "$Mai_depression.b")
-        if (!exists(var_name, envir = .GlobalEnv)) return(FALSE)  # Vérifie si Mai_depression.b existe
-        grepl("Mai_depression\\s*[>=]\\s*1\\.?5?", input$code_input) # Vérifie si le threshold est bien mis
+        df <- get(df_name(), envir = .GlobalEnv)
+        if (!"Mai_depression.b" %in% colnames(df)) return(FALSE)  # Vérifie si Mai_depression.b existe
+        grepl(".Mai_depression\\s*(>=\\s*2|>\\s*1\\.?\\d*)", input$code_input) # Vérifie si le threshold est bien mis
       },
-      solution = generate_reactive_string(
-        valid_expr = paste0(df_name(), "$Mai_depression.b <- ifelse(", df_name(), "$Mai_depression >= 2, 1, 0)"),
-        default_expr = "data$Mai_depression.b <- ifelse(data$Mai_depression >= 2, 1, 0)"
-      )
+      solution = "data$Mai_depression.b <- ifelse(data$Mai_depression >= 2, 1, 0)", # CORRIGER CA
+      # generate_reactive_string(
+      #   valid_expr = paste0(df_name(), "$Mai_depression.b <- ifelse(", df_name(), "$Mai_depression >= 2, 1, 0)"),
+      #   default_expr = "data$Mai_depression.b <- ifelse(data$Mai_depression >= 2, 1, 0)"
+      # ),
+      conclusion= "Another binary variable has been created, Mai_anxiete.b. Let's see more about that."
+    ),
+    # A PARTIR D'ICI, PLUS DE SOLUTIONS ADAPTATIVES
+    list(
+      instruction = "🔹 Display a confusion matrix of Mai_depression.b and Mai_anxiete.b.",
+      explanations = "You can use the option deparse.level = 2 to see which column corresponds to which variable.",
+      validation = function() {
+        sol1 <- paste0("table\\(data\\$Mai_depression\\.b, data\\$Mai_anxiete\\.b.")
+        sol2 <- paste0("table\\(data\\$Mai_anxiete\\.b, data\\$Mai_depression\\.b.")
+        if (grepl(sol1, input$code_input) | grepl(sol2, input$code_input)) T
+        else F
+      },
+      solution = "table(data$Mai_depression.b, data$Mai_anxiete.b, deparse.level=2)",
+      conclusion = "What do you see ? How do you interprete that ?"
+    ),
+    list(
+      instruction = "🔹 Relative Risk and Odds Ratio",
+      explanations = "Use the twoby2 function. Watch out, because it considers that 0 is sick and 1 is not.",
+      validation = function() {T},
+      solution = "twoby2(1- data$Mai_anxiete.b, 1 - data$Mai_depression.b)",
+      conclusion = "This function displays the RR and the OR."
     )
   )
   
@@ -232,16 +255,16 @@ server <- function(input, output, session) {
       
       for (line in lines) {
         if (nchar(trimws(line)) > 0) {  # Ignore les lignes vides
-      result <- tryCatch({
-        eval(parse(text = line), envir = .GlobalEnv)
-      }, error = function(e) {
-        paste("🚨 Erreur :", e$message)
-      })
-      
-      line_output <- capture.output(print(result))  # Affiche la sortie explicite
-      
-      all_output <- c(all_output, paste("> ", line), line_output, "")  # Ajoute une ligne vide entre chaque commande
-    }
+          result <- tryCatch({
+            eval(parse(text = line), envir = .GlobalEnv)
+          }, error = function(e) {
+            paste("🚨 Erreur :", e$message)
+          })
+          
+          line_output <- capture.output(print(result))  # Affiche la sortie explicite
+          
+          all_output <- c(all_output, paste("> ", line), line_output, "")  # Ajoute une ligne vide entre chaque commande
+        }
       }
       
       # Affichage du résultat
@@ -264,6 +287,12 @@ server <- function(input, output, session) {
           objs <- ls(envir = .GlobalEnv)
           dataframes <- objs[sapply(objs, function(x) inherits(get(x, envir = .GlobalEnv), "data.frame"))]
           df_name(dataframes[1]) # On vérifie pas que dataframes n'est pas nul car c'est déjà la condition de validité de l'étape 1
+        }
+        if (steps[[step]]$instruction == "🔹 Let's create a binary variable, Mai_depression.b."){
+          # Créer la nouvelle variable Mai_anxiete.b si l'étape de création de Mai_depression.b est réussie
+          df <- get(df_name(), envir = .GlobalEnv)  # Récupérer la dataframe
+          df$Mai_anxiete.b <- ifelse(df$Mai_anxiete >= 2, 1, 0)  # Créer la variable
+          assign(df_name(), df, envir = .GlobalEnv) 
         }
         output$feedback <- renderText(paste("✅ Correct !", steps[[step]]$conclusion, " Click on 'Next' to continue"))
         updateActionButton(session, "next_step", disabled = FALSE)
