@@ -80,6 +80,7 @@ server <- function(input, output, session) {
       solution = "smc <- read.csv2('smcovid.csv')",
       questions = list(
         list(
+          question = "You will have some questions to answer here before being able to go to the next page. Got it ?",
           options = c("Yes", "No", "The answer D"),
           correct = "Yes"
         )
