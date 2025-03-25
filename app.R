@@ -16,11 +16,13 @@ generate_reactive_string <- function(valid_expr, default_expr) {
 
 
 ui <- page_fluid(
-  titlePanel("Statistics with R for begginers"),
-  
-  # Instructions
-  uiOutput("instructions"),
-  textOutput("explanations"),
+  card(
+    titlePanel("Statistics with R for begginers"),
+    
+    # Instructions
+    uiOutput("instructions"),
+    textOutput("explanations")
+  ),
   
   layout_columns(
     col_width=3,
@@ -372,7 +374,7 @@ server <- function(input, output, session) {
         ),
         list(
           question = "Why ?",
-          options = c("Because it is more understandable", 
+          options = c("Because it is more understandable",
                       "Because it's a case control study (same amount of sick / non-sick in the sample)"),
           correct = "Because it is more understandable",
           cl = "When someone has anxiousness he is 3 times more likely to have depression."
@@ -437,7 +439,7 @@ server <- function(input, output, session) {
         ),
         list(
           question = "What is the p-value used for ?",
-          options = c("To confirm with a high level of certitude that the results cannot be explained just with luck", 
+          options = c("To confirm with a high level of certitude that the results cannot be explained just with luck",
                       "To obtain the probability the results are not based on luck"),
           correct = "To confirm with a high level of certitude that the results cannot be explained just with luck",
           cl = "p is the probability that chance alone can explain a difference at least as large as the one observe. It depends a lot on the size of the sample."
@@ -465,10 +467,10 @@ server <- function(input, output, session) {
           ),
           correct = "Neyman & Pearson has a binary result, Fisher a continuous one",
           cl = {
-            "According to Neyman & Pearson, when validating or non validating an hypothesis, there are 2 possible risks: 
-            alpha (the probability to accept H1 whereas H0, the status quo, is true) and beta (the probability to reject H1 whereas it was true). 
-            We try then to minimize alpha and beta (and specially alpha, which is the 'worst'). We fix the value of alpha to a threshold, 
-            and we observe the p-value: if it respects this threshold, H1 is accepted, otherwise it's not. 
+            "According to Neyman & Pearson, when validating or non validating an hypothesis, there are 2 possible risks:
+            alpha (the probability to accept H1 whereas H0, the status quo, is true) and beta (the probability to reject H1 whereas it was true).
+            We try then to minimize alpha and beta (and specially alpha, which is the 'worst'). We fix the value of alpha to a threshold,
+            and we observe the p-value: if it respects this threshold, H1 is accepted, otherwise it's not.
             On the contrary, Fisher's approach is considering the more p is low the more the test is relevant."
           }
         ),
@@ -498,6 +500,101 @@ server <- function(input, output, session) {
           question = "What is the relevance of the result according to Fisher ?",
           options = c("Very relevant", "Quite relevant", "Not that much relevant", "Not relevant"),
           correct = "Very relevant"
+        )
+      )
+    ),
+    list(
+      instruction = "🔹 Plot a boxplot of age according to anxiety (in May).",
+      explanations = {"Try the structure varA~varB which means varA comparing to varB."},
+      validation = function() {
+        grepl("boxplot\\(.*\\$age~.*\\$Mai_anxiete", input$code_input) # Either binary or non binary is ok
+      },
+      solution = "boxplot(data$age~data$Mai_anxiete.b)",
+      questions = list(
+        list(
+          question = "What do you see about the sample ?",
+          options = c("On average, youngest people are more anxious", "On average, oldest people are more anxious", "On average, anxious people are older", "On average, anxious people are younger", "It seems to be more or less the same between anxious and non anxious people"),
+          correct = "On average, anxious people are younger"
+        ),
+        list(
+          question = "What test should we conduct to see if this discovery is reliable or not for the whole population ?",
+          options = c("Chi-2 test (chisq.test)", "Student t test (t.test)", "McNemar test (mcnemar.test)", "Fisher's exact test (fisher.test)"),
+          correct = "Student t test (t.test)"
+        ),
+        list(
+          question = "What is NOT one of the validation criteria ?",
+          options = c("Size of the sample big enough", "The continuous variable follows a normal distribution", "The variances between the 2 sub-samples are equal", "There are all validation criteria"),
+          correct = "There are all validation criteria"
+        ),
+        list(
+          question = "Welch's approximation t test (t.test) allows to compare 2 means too. What is NOT one of the validation criteria for this test ?",
+          options = c("Size of the sample big enough", "The continuous variable follows a normal distribution", "The variances between the 2 sub-samples are equal", "There are all validation criteria"),
+          correct = "The variances between the 2 sub-samples are equal"
+        ),
+        list(
+          question = "There is still another test that compares 2 means, called Wilcoxon (wilcox.test). This one has no validation criteria. Then, why should we chose another test ?",
+          options = c("It does not compare average but ranks of individuals", "You cannot use any other method that needs a normal distribution", "Both"),
+          correct = "Both"
+        )
+      )
+    ),
+    list(
+      instruction = "🔹 Are the variance of the 2 subsamples equal ? Use the function by",
+      explanations = {"We learnt how to compare 2 percentages (binary variables). We now want to compare 2 means (continuous variable) 
+        (here, the age of those who suffer from anxiete in May and those who didn't)."},
+      validation = function() {
+        grepl("by", input$code_input) &
+        grepl("\\$Mai_anxiete\\.b", input$code_input) &
+        grepl("\\$age", input$code_input) &
+        grepl("\\b(sd|var)\\b", input$code_input)
+            },
+      solution = "by(data$age, data$Mai_anxiete.b, sd, na.rm=T)",
+      questions = list(
+        list(
+          question = "Is the size of the sample big enough ?",
+          options = c("Yes", "No"),
+          correct = "Yes"
+        ),
+        list(
+          question = "Remember about the histogram you plotted at the beggining (you can plot it again) ? We said we can consider age follows a normal distribution. Why ?",
+          options = c("We recognized the bell shape of a normal distribution", "Frequency strictly increased and then decreased", "Frequency is not constant"),
+          correct = "Frequency strictly increased and then decreased",
+          cl = "There is another test that can say if it follows a normal distribution : qqnorm(data$age); qqline(data$age). If all the dots are above the line, it's ok, otherwize it's not."
+        ),
+        list(
+          question = "Are the variance of the 2 subsamples equal ? ",
+          options = c("Yes", "Not totally, but we can consider as so", "No"),
+          correct = "No"
+        ),
+        list(
+          question = "Then in our case, which test should we conduct ?",
+          options = c("Student t test (t.test)", "Welch's appr t test (t.test)", "Wilcoxon test (wilcox.test)"),
+          correct = ("Welch's appr t test (t.test)")
+        )
+      )
+    ),
+    list(
+      instruction = "🔹 On average, is there a significant age difference between someone that suffers from anxiete and someone who don't ?",
+      explanations = {"Perform a Welch's appr t test. In these test, you need to use the varA~varB structure."},
+      validation = function() {
+        grepl("t.test\\(.*\\$age~.*\\$Mai_anxiete\\.b", input$code_input)
+      },
+      solution = "t.test(data$age~data$Mai_anxiete.b)",
+      questions = list(
+        list(
+          question = "Remembered a student t test uses the same function ? But what changes ?",
+          options = c("R knows if the variances are equal or not automatically, you don't have to change anything", "You add the option method='student'", "You add the option var.equal = T"),
+          correct = "You add the option var.equal = T"
+        ),
+        list(
+          question = "What piece of information does this function NOT gives you ?",
+          options = c("The p-value", "The mean of the 2 groups", "The variance of the 2 groups"),
+          correct = "The variance of the 2 groups"
+        ),
+        list(
+          question = "What can you say about the result ?",
+          options = c("The 2 means are statistically different", "The 2 means are different but it is not a statistical difference", "The 2 means are statistically different according to Neyman & Pearson but not Fisher"),
+          correct = "The 2 means are statistically different"
         )
       )
     )
@@ -564,7 +661,6 @@ server <- function(input, output, session) {
 
     # Mise à jour de l'état de validation
     isolate({ validation_state_q$valid <- valid })
-    print(validation_state_q$valid)
     
     if(validation_state_d$valid) {
       if (valid) output$feedback <- renderText(paste("✅ Correct !", steps[[step]]$conclusion, " Click on 'Next' to continue"))
