@@ -540,7 +540,7 @@ server <- function(input, output, session) {
     ),
     list(
       instruction = "🔹 Are the variance of the 2 subsamples equal ? Use the function by",
-      explanations = {"We learnt how to compare 2 percentages (binary variables). We now want to compare 2 means (continuous variable) 
+      explanations = {"We learnt how to compare 2 percentages (binary variables). We now want to compare 2 means (continuous variable)
         (here, the age of those who suffer from anxiete in May and those who didn't)."},
       validation = function() {
         grepl("by", input$code_input) &
@@ -577,7 +577,8 @@ server <- function(input, output, session) {
       instruction = "🔹 On average, is there a significant age difference between someone that suffers from anxiete and someone who don't ?",
       explanations = {"Perform a Welch's appr t test. In these test, you need to use the varA~varB structure."},
       validation = function() {
-        grepl("t.test\\(.*\\$age~.*\\$Mai_anxiete\\.b", input$code_input)
+        grepl("t\\.test\\(.*\\$age~.*\\$Mai_anxiete\\.b", input$code_input) &
+        !grepl("var\\.equal", input$code_input)
       },
       solution = "t.test(data$age~data$Mai_anxiete.b)",
       questions = list(
@@ -595,6 +596,125 @@ server <- function(input, output, session) {
           question = "What can you say about the result ?",
           options = c("The 2 means are statistically different", "The 2 means are different but it is not a statistical difference", "The 2 means are statistically different according to Neyman & Pearson but not Fisher"),
           correct = "The 2 means are statistically different"
+        ),
+        list(
+          question = "Does this confirm the observation you did based on the boxplots ?",
+          options = c("Yes", "No"),
+          correct = "Yes"
+        )
+      ),
+      conclusion = "Another thing you can see with the t.test is a difference with an integer."
+    ),
+    list(
+      instruction = "🔹 Does my sample represents well my population in age ?",
+      explanations = "You can perform a One sample t-test using the same function with the option mu. Let's consider our population is the United States inhabitants. The average age there is 38 years old.",
+      validation = function() {
+        grepl("t\\.test\\(.*\\$age,\\s*mu.*38\\)", input$code_input)
+      },
+      solution = "t.test(data$age, mu=38)",
+      questions = list(
+        list(
+          question = "Can we say the sample represents well my population in age ?",
+          options = c("Yes, the sample has the same mean", "Yes, it's inside the 95CI", "No, it's not too far but is still different", "No because the result is not statistically relevant"),
+          correct = "No because the result is not statistically relevant"
+        ),
+        list(
+          question = "Can we say the sample does not represent well my population in age ? (Tip: use =!).",
+          options = c("Yes, the means are statistically different", "No, the sample's mean is inside the 95CI", "No because the result is not statistically relevant"),
+          correct = "No, the sample's mean is inside the 95CI"
+        )
+      )
+    ),
+    list(
+      instruction = "🔹 What is the correlation between age and the number of childs (n.enfant) ?",
+      explanations = "The correlation gives you a clue about the strength of association between 2 variables. You can help you with the questions.",
+      validation = function() {
+        grepl("cor", input$code_input) &
+        grepl("\\$n\\.enfant", input$code_input) &
+        grepl("\\$age", input$code_input)
+      },
+      solution = "cor(data$n.enfant, data$age, use = 'complete.obs')",
+      questions = list(
+        list(
+          question = "What option do you need to use to avoid empty values ?",
+          options = c("use = 'remove.na'", "useNA = F", "use = 'complete.obs'", "na.rm = T"),
+          correct = "use = 'complete.obs'"
+        ),
+        list(
+          question = "What is r if it is a complete dependence between the 2 var ?",
+          options = c("+inf", "+/-inf", "0", "1", "+/-1"),
+          correct = "+/-1",
+          cl = "The correlation coefficient r is in [-1,1]. A correlation of 1 or -1 means the 2 variables are mutually determined : knowing one gives the other."
+        ),
+        list(
+          question = "What does r=0 means about the 2 variables ?",
+          options = c("They are mutually determined", "They are totally independant", "It's not enough to say anything"),
+          correct = "It's not enough to say anything",
+          cl = "They are independant iif they both follow a normal distribution. Otherwise, as the Pearson correlation looks at a linear correlation, they can still be dependant (quadratic relationship or concordance)."
+        ),
+        list(
+          question = "Is the obtained correlation statistically relevant ?",
+          options = c("Yes", "No", "We don't know"),
+          correct = "We don't know",
+          cl = "We don't have any information about the p-value or an 95CI."
+        )
+      ),
+      conclusion = "Let's see if the correlation is statistically relevant."
+    ),
+    list(
+      instruction = "🔹 Perform a test of nullity",
+      explanations = "The objective is to see wether the correlation between age and the number of childs exists or not. Use the function cor.test()",
+      validation = function() {
+          grepl("cor\\.test", input$code_input) &
+          grepl("\\$n\\.enfant", input$code_input) &
+          grepl("\\$age", input$code_input)
+      },
+      solution = "cor.test(data$n.enfant, data$age)",
+      questions = list(
+        list(
+          question = "What is the validation criteria to perform this test ?",
+          options = c("The variables follow a normal distribution", "At least one of the variables follows a normal distribution", "The variance of the 2 variables are equal", "The sample is big enough"),
+          correct = "At least one of the variables follows a normal distribution"
+        ),
+        list(
+          question = "In our case, was it ok to perform this test ?",
+          options = c("Yes", "No"),
+          correct = "Yes"
+        ),
+        list(
+          question = "If not, which test should we use ?",
+          options = c("Linear correlation", "Pearson's product-moment correlation", "Spearman rank correlation", "Neyman correlation"),
+          correct = "Spearman rank correlation",
+          cl = "The name of the test you performed is the Pearson's product-moment correlation. If it doesn't follow the validation criteria, you can use the Spearman rank correlation. You will use the same function cor.test but with the option method = 'spearman'."
+        ),
+        list(
+          question = "So, why can we say the correlation obtained is statistically relevant ?",
+          options = c("Because the 95CI exclude 0", "Because the correlation is in between the 95CI", "Because the p-value is very close to 0", "Because the p-value is enough far from 0"),
+          correct = "Because the p-value is very close to 0",
+          cl = "By the way, the correlation is always in between the 95CI as it is centered in r."
+        )
+      )
+    ),
+    list(
+      instruction = "🔹 Compares the anxiete before and after the confinement (in May vs in October. Oct_anxiete.b has been created)",
+      explanations = "Another type of test you can perform is the paired test. It compares the same thing before and after sth happens. It takes into account that each patient is its own control data. Use the questions to help you.",
+      validation = function() {
+        grepl("mcnemar\\.test", input$code_input) &
+          grepl("\\$Mai_anxiete", input$code_input) &
+          grepl("\\$Oct_anxiete", input$code_input)
+      },
+      solution = "mcnemar.test(data$Mai_anxiete.b, data$Oct_anxiete.b)",
+      questions = list(
+        list(
+          question = "To compare 2 binary values, which chi-2 test should we use ?",
+          options = c("Chi-2 test (chisq.test)", "Student t test (t.test)", "McNemar test (mcnemar.test)", "Fisher's exact test (fisher.test)"),
+          correct = "McNemar test (mcnemar.test)"
+        ),
+        list(
+          question = "To compare 2 quantitative values, which test should we use ?",
+          options = c("Chi-2 test (chisq.test)", "Student t test (t.test)", "McNemar test (mcnemar.test)", "Fisher's exact test (fisher.test)"),
+          correct = "Student t test (t.test)",
+          cl = "Yes, again ! You need to put the option paired to True"
         )
       )
     )
@@ -664,7 +784,7 @@ server <- function(input, output, session) {
     
     if(validation_state_d$valid) {
       if (valid) output$feedback <- renderText(paste("✅ Correct !", steps[[step]]$conclusion, " Click on 'Next' to continue"))
-      else output$feedback <- renderText(paste("✅ Correct !", steps[[step]]$conclusion, " Answer to the questions to continue."))
+      else output$feedback <- renderText(paste("✅ Correct ! Answer to the questions to continue."))
       updateActionButton(session, "next_step", disabled = !valid)
     }
 
@@ -742,7 +862,8 @@ server <- function(input, output, session) {
         if (steps[[step]]$instruction == "🔹 Let's create a binary variable, Mai_depression.b."){
           # Créer la nouvelle variable Mai_anxiete.b si l'étape de création de Mai_depression.b est réussie
           df <- get(df_name(), envir = .GlobalEnv)  # Récupérer la dataframe
-          df$Mai_anxiete.b <- ifelse(df$Mai_anxiete >= 2, 1, 0)  # Créer la variable
+          df$Mai_anxiete.b <- ifelse(df$Mai_anxiete >= 2, 1, 0)
+          df$Oct_anixete.b <- ifelse(df$Oct_anxiete >=2, 1, 0)
           assign(df_name(), df, envir = .GlobalEnv) 
         }
         validation_state_d$valid = T
@@ -750,7 +871,7 @@ server <- function(input, output, session) {
           output$feedback <- renderText(paste("✅ Correct !", steps[[step]]$conclusion, " Click on 'Next' to continue"))
           updateActionButton(session, "next_step", disabled = FALSE)
         }
-        else output$feedback <- renderText(paste("✅ Correct !", steps[[step]]$conclusion, "Answer to the questions to continue."))
+        else output$feedback <- renderText(paste("✅ Correct ! Answer to the questions to continue."))
       } else {
         output$feedback <- renderText(paste("❌ Incorrect, try again! If your're blocked, try that:",steps[[step]]$solution))
         # updateTextAreaInput(session, "code_input", value = steps[[step]]$solution)
