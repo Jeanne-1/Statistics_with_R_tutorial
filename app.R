@@ -78,8 +78,32 @@ server <- function(input, output, session) {
   # Liste des étapes du tutoriel
   steps <- list(
     list(
-      instruction = "🔹 Upload data from the file 'smcovid.csv'.",
-      explanations = "Use read.csv2 as the separator of the excel file is ; and not ,.",
+      instruction = "Welcome in this tutorial to learn how to use R for statistics !",
+      explanations = "Let's discover the dataset 'smcovid' together ! But before we start, let discover your environment...",
+      validation = function() {TRUE},
+      solution = "You can try anything !",
+      questions = list(
+        list(
+          question = "You can type anything in the left side. If you type on execute, it will launch your piece of code in the console. What does 2+2 displays ?",
+          options = c("Nothing", "4", "0"),
+          correct = "4"
+        ),
+        list(
+          question = "You will have some questions to answer here before being able to go to the next page. Got it ?",
+          options = c("Yes", "No", "The answer D"),
+          correct = "Yes"
+        ),
+        list(
+          question = "What is on your right ?",
+          options = c("All the previous code parts I launched", "All the data I stocked", "Just random things"),
+          correct = "All the data I stocked"
+        )
+      ),
+      conclusion = "Let's start serious things !!"
+    ),
+    list(
+      instruction = "🔹 Upload data from the file 'smcovid.csv' and stock it in the variable of your choice (data for instance).",
+      explanations = "Use the function read.csv2. You would have use read.csv if the separator of the excel file would be , and not ; as here.",
       validation = function() {
         objs <- ls(envir = .GlobalEnv)
         dataframes <- objs[sapply(objs, function(x) inherits(get(x, envir = .GlobalEnv), "data.frame"))]
@@ -93,9 +117,16 @@ server <- function(input, output, session) {
       solution = "smc <- read.csv2('smcovid.csv')",
       questions = list(
         list(
-          question = "You will have some questions to answer here before being able to go to the next page. Got it ?",
-          options = c("Yes", "No", "The answer D"),
-          correct = "Yes"
+          question = "How can you stock a variable in your environment (let say I want to stock 0 in the variable a) ?",
+          options = c("0 -> a", "a <- 0", "a = 0", "all of them"),
+          correct = "all of them",
+          cl = "The most used are the one with the arrow, so get use to these ones !"
+        ),
+        list(
+          question = "A dataset is kind of a giant table with a lot of informations. We will use after the vocabulary 'records' for:",
+          options = c("An element of the lines", "a variable", "a feature", "an element of the columns"),
+          correct = "An element of the lines",
+          cl = "In fact, a variable, a feature and an element of the columns are all the same thing !"
         )
       )
     ),
@@ -105,9 +136,14 @@ server <- function(input, output, session) {
       validation = function() {
         T
       }, # pas de validation, que sur le QCM
-      conclusion = "Have you seen the difference between these functions ?",
+      conclusion = "Have you seen the difference between these functions ? They are really important to understand your dataset.",
       solution = "head(data)",
       questions = list(
+        list(
+          question = "What does head displays ?",
+          options = c("Some random records", "The firsts records", "Some random variables", "The firsts variables"),
+          correct = "The firsts records"
+        ),
         list(
           question = "How many records are there?",
           options = c("629", "748", "811", "956"),  # Options du QCM
@@ -124,20 +160,34 @@ server <- function(input, output, session) {
           correct = "23"
         ),
         list(
-          question = "Which variable seems to be incomplete ?",
+          question = "Which variable seems to be the more incomplete ?",
           options = c("prof", "subst.cons", "Prise_Poids", "alc.cons"),
-          correct = "Prise_Poids"
+          correct = "Prise_Poids",
+          cl = "When a value is missing, you can see the letters 'NA' which is an indicator meaning 'Not Available'. For numbers, you also have 'NAN', which means 'Not A Number' and signifies an undefined result."
         ),
         list(
           question = "How many childs in the family are there max ?",
           options = c("10", "11", "12", "13"),
           correct = "11"
+        ),
+        list(
+          question = "Which variable is not type integer ?",
+          options = c("prof", "subst.cons", "Prise_Poids", "alc.cons"),
+          correct = "prof",
+          cl = "Except from integer (int), you can have many other types, such as numeric (num), which are decimals, character (chr), which are text, logical (log), which are binary variables that can be either True or False"
+        ),
+        list(
+          question = "You can see Mai_anxiete goes from 0 to 3. What do you think it means ?",
+          options = c("A number of day in May the person feeled anxious", "A rank from not feeling anxious to really feels anxious"),
+          correct = "A rank from not feeling anxious to really feels anxious",
+          cl = "Normally, you can have these pieces of information in the annotations. However, if it is not available, there are some things you can guess. \n
+          For instance, for a binay variable, 0 usually means no and 1 means yes."
         )
       )
     ),
     list(
       instruction = "🔹 How many features do you have for age ? Stock the value in tot.",
-      explanations = "Little reminder: you can catch age with the formula data$age.",
+      explanations = "You can catch age with the formula data$age. Look at the right of the screen, there are all your variables available in your environment (the one you stocked in a variable).",
       validation = function() { # REGLER L'ERREUR cannot coerce type 'closure' to vector of type 'character'
         if (!"tot" %in% ls(envir = .GlobalEnv)) return(FALSE)  # Vérifie si 'tot' existe
         value <- get("tot", envir = .GlobalEnv)  # Récupère la valeur de 'tot'
@@ -149,6 +199,22 @@ server <- function(input, output, session) {
         ),
       questions = list(
         list(
+          question = "Why dim doesn't work with data$age ?",
+          options = c("It's one dimensional", "It's too little", "It's an integer", "It's a character"),
+          correct = "It's one dimensional",
+          cl = "dim only works with 2 dimensional variables."
+        ),
+        list(
+          question = "You will have to do a superposition of 2 functions. The first is table. What does it gives you ?",
+          options = c("The number of person for each age", "A table of binary variables", "The information in the dataset for each age"),
+          correct ="The number of person for each age"
+        ),
+        list(
+          question = "Can you guess the second function you will have to use ?",
+          options = c("total", "mean", "size", "sum"),
+          correct = "sum"
+        ),
+        list(
           question = "Which information does it give you about age ?",
           options = c("Nothing, we miss other piece of info", "There are some missing values", "There are no missing values"),
           correct = "There are no missing values"
@@ -156,7 +222,7 @@ server <- function(input, output, session) {
       )
     ),
     list(
-      instruction = "🔹 What is the mean of age ?",
+      instruction = "🔹 What is the mean of age for our sample ?",
       validation = function() {
         # AJOUTER UNE VERIFICATION DE TYPE
         if (is.null(df_name())) return(FALSE)
@@ -185,9 +251,15 @@ server <- function(input, output, session) {
         },
       questions = list(
         list(
+          question = "What is a sample ?",
+          options = c("A part of the global population (the one you want to study)", "Random records corresponding to the global population (world population)"),
+          correct = "A part of the global population (the one you want to study)"
+        ),
+        list(
           question = "How would you do if you had some missing values for age ?",
-          options = c("I would panic", "I delete the Na from the dataset (na.omit(data))", "I add the option na.rm = T"),
-          correct = "I add the option na.rm = T"
+          options = c("I would panic", "I delete the Na from the dataset (na.omit(data))", "I add the option na.rm = TRUE"),
+          correct = "I add the option na.rm = TRUE",
+          cl = "An option is something you add inside a function to add details. For instance, to draw an histogram in pink, you can say hist(data$age, col = 'pink')"
         ),
         list(
           question = "How do you get the standard deviation of data ?",
@@ -195,7 +267,7 @@ server <- function(input, output, session) {
           correct = "sd(data)"
         ),
         list(
-          question = "Is the mean age of the global population can be estimated with this one ?",
+          question = "Can the mean age of the global population be estimated with the one we just calculated ?",
           options = c("Yes", "No"),
           correct = "Yes",
           cl = "Observations in the sample can give information about the global population, but there are less precise."
@@ -217,14 +289,20 @@ server <- function(input, output, session) {
         ),
       questions = list(
         list(
-          question = "What is the expected result ?",
-          options = c("An interval", "An int", "A percentage"),
-          correct = "An interval"
-        ),
-        list(
-          question = "What does 95CI mean ?",
+          question = "What does it mean ?",
           options = c("We are 95% confident that the result is not in between these values", "The global mean of the population is 95% likely to be in between these 2 values", "The global mean of the population is in between these 2 values, and there are 95% chance it is the mean of the sample"),
           correct = "The global mean of the population is 95% likely to be in between these 2 values"
+        ),
+        list(
+          question = "What is the formula for the CI of the mean ? n is the total number of records, mu the standard deviation and z is a constant.",
+          options = c("mean +/- z*sd/sqrt(n)", "mean +/- z*mu", "mean +/- z*sqrt(n)"),
+          correct = "mean +/- z*sd/sqrt(n)",
+          cl = "For a 95CI, we take z = 1.96. It differs depending on the percentage you want to use. You can find the corresponding z with the z-table."
+        ),
+        list(
+          question = "What rounded result did you obtain ?",
+          options = c("[32.16, 39.84]","[35.85,39.82]","[36.90, 38.77]","[36.90, 39.84]"),
+          correct = "[36.90, 38.77]"
         )
       )
     ),
@@ -256,7 +334,7 @@ server <- function(input, output, session) {
           correct = "We can only perform some tests on gaussian variable"
         ),
         list(
-          question = "With which option can you change the title of the plot ?",
+          question = "With which option can you change the title of the plot ? Don't forget that you can try them to your left ;)",
           options = c("title = ", "main = ", "set_title = ", "lab = "),
           correct = "main = "
         ),
@@ -280,9 +358,14 @@ server <- function(input, output, session) {
       #   default_expr = "prop.table(table(data$Mai_depression==3))*100"
       # ),
       questions = list(
+        list(
+          question = "As for the total number of age records, you need to use multiple function. You already used the first one, about the second one, it allows numbers to become proportions. Can you guess which function is it ?",
+          options = c("percent", "prop", "percent.table", "prop.table"),
+          correct = "prop.table"
+        ),
         list (
           question = "From this piece of information, can you say that there are less people with depression in May than people without ?",
-          options = c("Yes", "No", "It depends on where you put the threshold concerning considering someone in depression or not"),
+          options = c("Yes", "No", "It depends on where you put the threshold considering someone in depression or not"),
           correct = "It depends on where you put the threshold considering someone in depression or not"
         ),
         list(
@@ -309,6 +392,12 @@ server <- function(input, output, session) {
       conclusion= "Another binary variable has been created, Mai_anxiete.b. Let's see more about that.",
       questions = list(
         list(
+          question = "Which method should you use to do so ?",
+          options = c("Delete the 1 and 2 from Mai_depression", "0 will be for Mai_depression is 0 or 1 ; 1 for Mai_depression is 2 or 3", "Another method"),
+          correct = "0 will be for Mai_depression is 0 or 1 ; 1 for Mai_depression is 2 or 3",
+          cl = "Use the function ifelse(condition, if true, if false)."
+        ),
+        list(
           question = "Why do you want to create a binary variable ?",
           options = c("To conduct tests on percentages", "For explainability", "To have simpler tests"),
           correct = "To conduct tests on percentages"
@@ -318,7 +407,7 @@ server <- function(input, output, session) {
     # A PARTIR D'ICI, PLUS DE SOLUTIONS ADAPTATIVES
     list(
       instruction = "🔹 Display a confusion matrix of Mai_depression.b and Mai_anxiete.b.",
-      explanations = "You can use the option deparse.level = 2 to see which column corresponds to which variable.",
+      explanations = "Remember, you already used this function twice ! And you can use the option deparse.level = 2 to see which column corresponds to which variable.",
       validation = function() {
         if (grepl("table", input$code_input)
             & grepl("Mai_depression\\.b", input$code_input)
@@ -340,14 +429,14 @@ server <- function(input, output, session) {
         ),
         list(
           question = "What does the option useNA = 'always'",
-          options = c("It adds a column for the null values", "It ignores null values", "It is not possible as useNA is a boolean option"),
-          correct = "It adds a column for the null values"
+          options = c("It adds a column for the empty values", "It ignores empty values", "It is not well used as useNA is a boolean option"),
+          correct = "It adds a column for the empty values"
         )
       )
-    ), # ADD A QUESTION ABOUT PEARSON COR
+    ),
     list(
       instruction = "🔹 Find the Relative Risk and Odds Ratio of depression according to anxiousness (in May).",
-      explanations = "Use the twoby2 function. Watch out, the order count, and it considers that 0 is sick and 1 is not.",
+      explanations = "Use the twoby2 function. Watch out: first, the order count, and second, it considers that 0 is sick and 1 is not.",
       validation = function() {
             if (grepl("twoby2", input$code_input)
                 & grepl("1\\s*-", input$code_input)
@@ -731,6 +820,28 @@ server <- function(input, output, session) {
     )
   )
   
+  output$progress_bar <- renderUI({
+    step <- current_step()
+    total <- length(steps)
+    progress_percent <- round((step - 1) / total * 100)
+    
+    tagList(
+      tags$div(style = "width: 100%; background-color: #eee; height: 20px; border-radius: 10px; overflow: hidden;",
+               tags$div(
+                 style = paste0(
+                   "width:", progress_percent, "%;",
+                   "height: 100%;",
+                   "background-color: #4CAF50;",
+                   "text-align: center;",
+                   "line-height: 20px;",
+                   "color: white;",
+                   "font-weight: bold;"
+                 ),
+                 paste0(progress_percent, "%")
+               )
+      )
+    )
+  })
   
   # Étape actuelle du tutoriel
   current_step <- reactiveVal(1)
@@ -802,6 +913,7 @@ server <- function(input, output, session) {
 
     # Mise à jour de l'état de validation
     isolate({ validation_state_q$valid <- valid })
+    
     
     if(validation_state_d$valid) {
       if (valid) output$feedback <- renderText(paste("✅ Correct !", steps[[step]]$conclusion, " Click on 'Next' to continue"))
