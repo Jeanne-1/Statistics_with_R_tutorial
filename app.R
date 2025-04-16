@@ -18,6 +18,7 @@ generate_reactive_string <- function(valid_expr, default_expr) {
 ui <- page_fluid(
   card(
     titlePanel("Statistics with R for begginers"),
+    uiOutput("progress_bar"),
     
     # Instructions
     uiOutput("instructions"),
@@ -45,11 +46,20 @@ ui <- page_fluid(
       uiOutput("questionnaire_cl")
     ),
     card(
-      # Affichage des objets en mémoire comme dans RStudio
-      h4("📂 Environment"),
+      class = "p-3",
+      style = "background-color: #f8f9fa; border: 1px solid #dee2e6; font-family: 'Courier New', monospace;",
+      
+      h4("📂 Environment", style = "margin-bottom: 15px;"),
+      
       tabsetPanel(
-        tabPanel("📊 Data", DTOutput("data_memory")),
-        tabPanel("🔢 Values", DTOutput("values_memory"))
+        tabPanel(
+               tags$div("📊 Data", style = "font-weight: bold; margin-bottom: 5px;"),
+               DTOutput("data_memory")
+        ),
+        tabPanel(
+               tags$div("🔢 Values", style = "font-weight: bold; margin-bottom: 5px;"),
+               DTOutput("values_memory")
+        )
       )
     )
   ),
@@ -913,42 +923,61 @@ server <- function(input, output, session) {
   })
   
   # Fonction pour récupérer les objets en mémoire
-  get_memory_objects <- reactivePoll(
-    intervalMillis = 1000,  # Vérifie toutes les 1 seconde
-    session = session,
+  get_memory_objects <- function() {
+    objs <- ls(envir = .GlobalEnv)
+    
+    info <- lapply(objs, function(obj_name) {
+      obj <- get(obj_name, envir = .GlobalEnv)
+      obj_class <- class(obj)[1]
+      
+      # Taille ou dimensions
+      if (is.data.frame(obj)) {
+        taille <- paste(nrow(obj), "obs. of", ncol(obj), "variables")
+        valeur <- ""
+      } else if (length(obj) == 1) {
+        taille <- "1"
+        valeur <- as.character(obj)
+      } else {
+        taille <- length(obj)
+        valeur <- ""
+      }
+      
+      list(
+        Nom = obj_name,
+        Type = obj_class,
+        Taille = taille,
+        Valeur = valeur
+      )
+    })
+    
+    do.call(rbind, lapply(info, as.data.frame, stringsAsFactors = FALSE))
+  }
+  memoryData <- reactivePoll(1000, session,
     checkFunc = function() {
-      ls(envir = .GlobalEnv)  # Vérifie les objets présents
+      ls(envir = .GlobalEnv)  # Change si un objet change
     },
     valueFunc = function() {
-      objs <- ls(envir = .GlobalEnv)
-      if (length(objs) == 0) return(data.frame(Nom = "Aucun objet en mémoire", Type = "", Taille = ""))
-      
-      data <- data.frame(
-        Nom = objs,
-        Type = sapply(objs, function(x) class(get(x, envir = .GlobalEnv))[1]),
-        Taille = sapply(objs, function(x) format(object.size(get(x, envir = .GlobalEnv)), units = "auto")),
-        stringsAsFactors = FALSE
-      )
-      
-      return(data)
+      get_memory_objects()
     }
   )
   
   # Mise à jour du tableau "Data"
   output$data_memory <- renderDT({
-    data_mem <- get_memory_objects()
+    data_mem <- memoryData()
     data_mem <- data_mem[data_mem$Type %in% c("data.frame", "tibble"), ]
-    if (nrow(data_mem) == 0) data_mem <- data.frame(Nom = "Aucune table de données")
-    datatable(data_mem, options = list(pageLength = 5))
+    if (is.null(nrow(data_mem)) || nrow(data_mem) == 0) data_mem <- data.frame(Nom = "No dataset in memory", Type = "", Taille = "", Valeur = "")
+    datatable(data_mem[, c("Nom", "Type", "Taille")], options = list(dom = 't', pageLength = 5))
   })
+  
   
   # Mise à jour du tableau "Values"
   output$values_memory <- renderDT({
-    val_mem <- get_memory_objects()
+    val_mem <- memoryData()
     val_mem <- val_mem[!val_mem$Type %in% c("data.frame", "tibble"), ]
-    if (nrow(val_mem) == 0) val_mem <- data.frame(Nom = "Aucune variable en mémoire")
-    datatable(val_mem, options = list(pageLength = 5))
+    if (is.null(nrow(val_mem)) || nrow(val_mem) == 0) val_mem <- data.frame(Nom = "No variable in memory", Type = "", Taille = "", Valeur = "")
+    datatable(val_mem[, c("Nom", "Type", "Valeur")], options = list(dom = 't', pageLength = 5))
   })
+  
 }
 
 shinyApp(ui = ui, server = server)
