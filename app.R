@@ -817,6 +817,121 @@ server <- function(input, output, session) {
           cl = "Yes, again ! You need to put the option paired to True"
         )
       )
+    ),
+    list(
+      instruction = "🔹 We would like to know if there is a linear regression between age and weight gain. Use a plot for the first visualization.",
+      explanations = "Help you with the questions.",
+      validation = function() {
+        grepl("plot", input$code_input) &
+          grepl("jitter\\(.*\\$age", input$code_input) &
+          grepl("jitter\\(.*\\$Prise_Poids", input$code_input)
+      },
+      solution = "plot(jitter(data$age), jitter(data$Prise_Poids))",
+      questions = list(
+        list(
+          question = "The function jitter is used to add jitter to the data. Why should we use it ?",
+          options = c("To be more accurate", "To add uncertainty", "To see every point in plots"),
+          correct = "To see every point in plots"
+        ),
+        list(
+          question = "What is a linear model (a and b constants) ?",
+          options = c("varA = a*varB","varA = a+b*varB", "varA = a+b*varB²"),
+          correct = "varA = a+b*varB"
+        ),
+        list(
+          question = "We said earlier that a correlation is linear. Why should we perform a linear regression then ?",
+          options = c("They are complementary", "It is more interpretable", "It gives more precise information"),
+          correct = "It is more interpretable",
+          cl = "b and r are related with the function r = b*sd(A)/sd(B)"
+        ),
+        list(
+          question = "What is the function skeleton to create the linear model ?",
+          options = c("lm(varA~varB)", "lm(varA,varB)", "linear.mod(varA~varB)", "linear.mod(varA,varB)"),
+          correct = "lm(varA~varB)"
+        )
+      )
+    ),
+    list(
+      instruction = "🔹 Create the linear model of weight gain according to age and stock it in mod1.",
+      validation = function() {
+        grepl("mod1", input$code_input) &
+          grepl("lm\\(.*\\$Prise_Poids~.*\\$age", input$code_input)
+      },
+      solution = "mod1 <- lm(data$Prise_Poids~data$age)",
+      questions = list(
+        list(
+          question = "With which function can you add a line on a plot ?",
+          options = c("abline", "addline", "linear", "add"),
+          correct = "abline"
+        ),
+        list(
+          question = "Which information does mod1 carry ?",
+          options = c("a and b", "a p-value", "both", "none of them"),
+          correct = "both",
+          cl = "You can have the p-value with the function summary."
+        ),
+        list(
+          question = "Is rounded b:",
+          options = c("4.13", "0.145", "0.06", "closest to 0"),
+          correct = "0.06"
+        ),
+        list(
+          question = "Then, what can you say about b ?",
+          options = c("It is neglectable", "It is different from 0", "We don't know yet"),
+          correct = "We don't know yet"
+        ),
+        list(
+          question = "What does this mean ?",
+          options = c("If we gain 1kg we are b years older", "If we are 1 year older we gain b kg", "None of them"),
+          correct = "If we are 1 year older we gain b kg"
+        )
+      )
+    ),
+    list(
+      instruction = "🔹 Add mod1 to the plot.", # DO NOT WORK YET + truc bizarre avec le QCM
+      validation = function() {
+        grepl("mod1", input$code_input) &
+        grepl("abline\\(", input$code_input)
+      },
+      solution = "abline(mod1)",
+      questions = list(
+        list(
+          question = "With which option can you get the line thicker ?",
+          options = c("thick", "thickness", "lwd", "size"),
+          correct = "lwd"
+        ),
+        list(
+          question = "Does the weight gain seem to be linked to the age ?",
+          options = c("Yes", "No", "It's hard to say"),
+          correct = "Yes"
+        ),
+        list(
+          question = "Does it correlates with b obtained before ?",
+          options = c("Yes", "No"),
+          correct = "Yes"
+        )
+      )
+    ),
+    list(
+      instruction = "🔹 Are we sure that b is different from 0 ?",
+      explanations = "Try the summary function on mod1.",
+      validation = function() {
+        grepl("mod1", input$code_input) &
+          grepl("summary\\(", input$code_input)
+      },
+      solution = "summary(mod1)",
+      questions = list(
+        list(
+          question = "What do yo obtain ?",
+          options = c("The p-value", "The 95CI", "Different possibilities for a and b"),
+          correct = "The p-value"
+        ),
+        list(
+          question = "So, what can you say about b ?",
+          options = c("It is neglectable", "It is different from 0", "We don't know yet"),
+          correct = "It is different from 0"
+        )
+      )
     )
   )
   
