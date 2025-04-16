@@ -41,7 +41,8 @@ ui <- page_fluid(
       textOutput("feedback")
     ),
     card(
-      uiOutput("questionnaire")
+      uiOutput("questionnaire"),
+      uiOutput("questionnaire_cl")
     ),
     card(
       # Affichage des objets en mémoire comme dans RStudio
@@ -745,7 +746,7 @@ server <- function(input, output, session) {
   
   output$code_input_ui <- renderUI({
     step <- current_step()
-    rows <- ifelse(step == 5, 2, 1)  # Change X par le numéro de l'étape où il faut plus de place
+    rows <- ifelse(step > 4, 2, 1)  # Change X par le numéro de l'étape où il faut plus de place
     textAreaInput("code_input", "Type your code here :", rows = rows)
   })
   
@@ -765,7 +766,8 @@ server <- function(input, output, session) {
     if (is.null(questions)) {
       validation_state_q$valid <- T
       return()  # Si pas de questions, ne rien faire
-      }
+    }
+    questionnaire_cl <- ""
 
     valid <- TRUE
     for (i in seq_along(questions)) {
@@ -776,6 +778,15 @@ server <- function(input, output, session) {
       if (is.null(user_answer) || user_answer != question$correct) {
         valid <- FALSE
         break  # Dès qu'une réponse est fausse, on arrête
+      }
+      else {
+        if(!is.null(question$cl)) {
+          if(questionnaire_cl=="") questionnaire_cl <- "Additional informations: \n"
+          questionnaire_cl <- paste(questionnaire_cl, " \n", question$cl) #PAS A LA LIGNE
+          output$questionnaire_cl <- renderUI({
+            HTML(paste("<pre>", questionnaire_cl, "</pre>"))
+          })
+          }
       }
     }
 
@@ -892,6 +903,7 @@ server <- function(input, output, session) {
       updateTextAreaInput(session, "code_input", value = "")  # Réinitialisation du champ
       output$feedback <- renderText("")  # Effacer les messages
       output$execution_output <- renderText("")
+      output$questionnaire_cl <- renderText("")
       updateActionButton(session, "next_step", disabled = TRUE)  # Désactiver "Suivant"
     } else {
       output$instructions <- renderUI({
