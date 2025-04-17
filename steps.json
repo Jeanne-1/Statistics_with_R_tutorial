@@ -1,0 +1,750 @@
+[
+  {
+    "instruction" : "Welcome in this tutorial to learn how to use R for statistics !",
+    "explanations" : "Let's discover the dataset 'smcovid' together ! But before we start, let's discover your environment...",
+    "validation" : ["rm", "ls"],
+    "solution" : "Answer to the questions, and you'll know what to write...",
+    "questions" : [
+      {
+        "question" : "You will have some questions to answer here before being able to go to the next page. Got it ? (Answer should be yes ;))",
+        "options" : ["Yes", "No", "The answer D"],
+        "correct" : 1
+      },
+      {
+        "question" : "You can type anything in the left side. If you type on execute, it will launch your piece of code in the console. What does 2+2 displays ?",
+        "options" : ["Nothing", "4", "0"],
+        "correct" : 2
+      },
+      {
+        "question" : "What is on your right ?",
+        "options" : ["All the previous code parts I launched", "All the data I stocked", "Just random things"],
+        "correct" : 2,
+        "cl" : "Sometimes you will have additional information about your questions here :)"
+      },
+      {
+        "question" : "We stocked some variables inside... Can you tell me what type is b ?",
+        "options" : ["Integer", "Character", "Dataset", "Other"],
+        "correct" : 1
+      },
+      {
+        "question" : "What is the size of mtcars ?",
+        "options" : ["10*18","32*11", "32*18", "10*11"],
+        "correct" : 2,
+        "cl" : "Delete variables from your environment with rm(list = ls()). Try it !"
+      }
+    ],
+    "conclusion" : "Let's start serious things !! Don't forget, you can go from questions to code whenever you want. There are 2 validations needed to go to the next question : the code and the QCM. The code verification is only done once, which means, if it is validated once it will be validated forever and you can change the code you want to launch."
+  },
+  {
+    "id": "check_data",
+    "instruction" : "🔹 Upload data from the file 'smcovid.csv' and stock it in data.",
+    "explanations" : "Use the function read.csv2. You would have use read.csv if the separator of the excel file would be , and not ; as here.",
+    "validation" : ["smcovid\\.csv", "read\\.csv"],
+    "solution" : "smc <- read.csv2('smcovid.csv')",
+    "questions" : [
+      {
+        "question" : "How can you stock a variable in your environment (let say I want to stock 0 in the variable a) ?",
+        "options" : ["0 -> a", "a <- 0", "a = 0", "all of them"],
+        "correct" : 4,
+        "cl" : "The most used are the one with the arrow, so get use to these ones !"
+      },
+      {
+        "question" : "A dataset is kind of a giant table with a lot of informations. We will use after the vocabulary 'records' for:",
+        "options" : ["An element of the lines", "a variable", "a feature", "an element of the columns"],
+        "correct" : 1,
+        "cl" : "In fact, a variable, a feature and an element of the columns are all the same thing !"
+      }
+    ]
+  },
+  {
+    "instruction" : "🔹 Observe the data you uploaded.",
+    "explanations" : "Try functions such as head, str, summary, describe and dim.",
+    "validation" : ["data"],
+    "conclusion" : "Have you seen the difference between these functions ? They are really important to understand your dataset.",
+    "solution" : "head(data)",
+    "questions" : [
+      {
+        "question" : "What does head displays ?",
+        "options" : ["Some random records", "The firsts records", "Some random variables", "The firsts variables"],
+        "correct" : 2
+      },
+      {
+        "question" : "How many records are there?",
+        "options" : ["629", "748", "811", "956"],
+        "correct" : 2
+      },
+      {
+        "question" : "How many variables ?",
+        "options" : ["6", "13", "26", "33"],
+        "correct" : 4
+      },
+      {
+        "question" : "How old is the first record ?",
+        "options" : ["23", "25", "27", "29"],
+        "correct" : 1
+      },
+      {
+        "question" : "Which variable seems to be the more incomplete ?",
+        "options" : ["prof", "subst.cons", "Prise_Poids", "alc.cons"],
+        "correct" : 3,
+        "cl" : "When a value is missing, you can see the letters 'NA' which is an indicator meaning 'Not Available'. For numbers, you also have 'NAN', which means 'Not A Number' and signifies an undefined result."
+      },
+      {
+        "question" : "How many childs in the family are there max ?",
+        "options" : ["10", "11", "12", "13"],
+        "correct" : 2
+      },
+      {
+        "question" : "Which variable is not type integer ?",
+        "options" : ["prof", "subst.cons", "Prise_Poids", "alc.cons"],
+        "correct" : 1,
+        "cl" : "Except from integer (int], you can have many other types, such as numeric (num], which are decimals, character (chr], which are text, logical (log], which are binary variables that can be either True or False"
+      },
+      {
+        "question" : "You can see Mai_anxiete goes from 0 to 3. What do you think it means ?",
+        "options" : ["A number of day in May the person felt anxious", "A rank from not feeling anxious to really feels anxious"],
+        "correct" : 2,
+        "cl" : "Normally, you can have these pieces of information in the annotations. However, if it is not available, there are some things you can guess. \nFor instance, for a binary variable, 0 usually means no and 1 means yes."
+      }
+    ]
+  },
+  {
+    "instruction" : "🔹 How many features do you have for age ? Stock the value in tot.",
+    "explanations" : "You can catch age with the formula data$age. Look at the right of the screen, do you see the variables you created ?",
+    "validation" : ["tot", "table\\(", "sum\\(", "data\\$age"],
+    "solution" : "tot <- sum(table(data$age))",
+    "questions" : [
+      {
+        "question" : "Why dim doesn't work with data$age ?",
+        "options" : ["It's one dimensional", "It's too little", "It's an integer", "It's a character"],
+        "correct" : 1,
+        "cl" : "dim only works with 2 dimensional variables."
+      },
+      {
+        "question" : "You will have to do a superposition of 2 functions. The first is table. What does it gives you ?",
+        "options" : ["The number of person for each age", "A table of binary variables", "The information in the dataset for each age"],
+        "correct" : 1
+      },
+      {
+        "question" : "Can you guess the second function you will have to use ?",
+        "options" : ["total", "mean", "size", "sum"],
+        "correct" : 4
+      },
+      {
+        "question" : "Which information does it give you about age ?",
+        "options" : ["Nothing, we miss other piece of info", "There are some missing values", "There are no missing values"],
+        "correct" : 3
+      }
+    ]
+  },
+  {
+    "id": "check_mean",
+    "instruction" : "🔹 What is the mean of age for our sample ?",
+    "validation" : ["mean"],
+    "solution" : "mean(data$age)",
+    "conclusion" : "Now we know the mean of the age of the 748 people that conducted the study. But what about the mean age of our global population ?",
+    "questions" : [
+      {
+        "question" : "What is a sample ?",
+        "options" : ["A part of the global population (the one you want to study)", "Random records corresponding to the global population (world population)"],
+        "correct" : 1
+      },
+      {
+        "question" : "How would you do if you had some missing values for age ?",
+        "options" : ["I would panic", "I delete the Na from the dataset (na.omit(data))", "I add the option na.rm = TRUE"],
+        "correct" : 3,
+        "cl" : "An option is something you add inside a function to add details. For instance, to draw an histogram in pink, you can say hist(data$age, col = 'pink')"
+      },
+      {
+        "question" : "How do you get the standard deviation of data ?",
+        "options" : ["std(data)", "sd(data)", "data.std", "data.sd"],
+        "correct" : 2
+      },
+      {
+        "question" : "Can the mean age of the global population be estimated with the one we just calculated ?",
+        "options" : ["Yes", "No"],
+        "correct" : 1,
+        "cl" : "Observations in the sample can give information about the global population, but there are less precise."
+      }
+    ]
+  },
+  {
+    "instruction" : "🔹 What is the mean of age of our global population ?",
+    "explanations" : "Find the 95% confidence interval (95CI).",
+    "validation" : [],
+    "solution" : "mean(data$age)-1.96*sd(data$age)/sqrt(tot], mean(data$age)+1.96*sd(data$age)/sqrt(tot)",
+    "questions" : [
+      {
+        "question" : "What does it mean ?",
+        "options" : ["We are 95% confident that the result is not in between these values", "The global mean of the population is 95% likely to be in between these 2 values", "The global mean of the population is in between these 2 values, and there are 95% chance it is the mean of the sample"],
+        "correct" : 2
+      },
+      {
+        "question" : "What is the formula for the CI of the mean ? n is the total number of records, mu the standard deviation and z is a constant.",
+        "options" : ["mean +/- z*sd/sqrt(n)", "mean +/- z*mu", "mean +/- z*sqrt(n)"],
+        "correct" : 1,
+        "cl" : "For a 95CI, we take z = 1.96. It differs depending on the percentage you want to use. You can find the corresponding z with the z-table."
+      },
+      {
+        "question" : "What rounded result did you obtain ?",
+        "options" : ["[32.16, 39.84]","[35.85,39.82]","[36.90, 38.77]","[36.90, 39.84]"],
+        "correct" : 3
+      }
+    ]
+  },
+  {
+    "instruction" : "🔹 Draw a histogram of age.",
+    "validation" : ["hist\\(.*\\$age"],
+    "solution" : "hist(data$age)",
+    "conclusion" : "Looking at the histogram can give you a clue whether the variable follows a normal distribution or not. What do you think ? \n",
+    "questions" : [
+      {
+        "question" : "What is the range that appears the most in the sample ?",
+        "options" : ["20-25", "25-30", "35-40", "45-50"],
+        "correct" : 2
+      },
+      {
+        "question" : "Do you think the variable can follow a normal distribution ?",
+        "options" : ["Yes without a doubt", "It doesn't follow a normal distribution but enough to consider as so", "Not at all"],
+        "correct" : 2
+      },
+      {
+        "question" : "What is the advantage of considering it as gaussian ?",
+        "options" : ["We can only perform some tests on gaussian variable", "It is more interpretable", "You cannot perform any statistical test on the variable if not"],
+        "correct" : 1
+      },
+      {
+        "question" : "With which option can you change the title of the plot ? Don't forget that you can try them to your left ;)",
+        "options" : ["title = ", "main = ", "set_title = ", "lab = "],
+        "correct" : 2
+      },
+      {
+        "question" : "With which option can you change the label of the x variable ?",
+        "options" : ["xtitle = ", "xlab = ", "xstick = "],
+        "correct" : 2
+      }
+    ]
+  },
+  {
+    "instruction" : "🔹 Display the percentage of people that had depression in May.",
+    "explanations" : "That is with Mai_depression==3",
+    "validation" : ["prop\\.table\\(table\\(\\s*data\\$Mai_depression\\s*==\\s*3\\)\\)\\s*\\*\\s*100"],
+    "solution" : "prop.table(table(data$Mai_depression==3))*100",
+    "questions" : [
+      {
+        "question" : "As for the total number of age records, you need to use multiple function. You already used the first one, about the second one, it allows numbers to become proportions. Can you guess which function is it ?",
+        "options" : ["percent", "prop", "percent.table", "prop.table"],
+        "correct" : 4
+      },
+      {
+        "question" : "From this piece of information, can you say that there are less people with depression in May than people without ?",
+        "options" : ["Yes", "No", "It depends on where you put the threshold considering someone in depression or not"],
+        "correct" : 3
+      },
+      {
+        "question" : "What does table(data$subst.cons == 1) display about the binary variable substance consumption ?",
+        "options" : ["The percentage of people with vs without", "The number of person with vs without", "A table of 748 False/True"],
+        "correct" : 2
+      }
+    ]
+  },
+  {
+    "id" : "check_b",
+    "instruction" : "🔹 Let's create a binary variable, Mai_depression.b.",
+    "explanations" : "Put the threshold at 1.5.",
+    "validation" : [".Mai_depression\\s*(>=\\s*2|>\\s*1\\.?\\d*)"],
+    "solution" : "data$Mai_depression.b <- ifelse(data$Mai_depression >= 2, 1, 0)",
+    "conclusion" : "Another binary variable has been created, Mai_anxiete.b. Let's see more about that.",
+    "questions" : [
+      {
+        "question" : "Which method should you use to do so ?",
+        "options" : ["Delete the 1 and 2 from Mai_depression", "0 for Mai_depression is 0 or 1 ; 1 for Mai_depression is 2 or 3", "Another method"],
+        "correct" : 2,
+        "cl" : "Use the function ifelse(condition, if true, if false)."
+      },
+      {
+        "question" : "Why do you want to create a binary variable ?",
+        "options" : ["To conduct tests especially on binary variables (on percentage)", "For explainability", "To have simpler tests"],
+        "correct" : 1
+      }
+    ]
+  },
+  {
+    "id" : "binar_test",
+    "instruction" : "🔹 Display a confusion matrix of Mai_depression.b and Mai_anxiete.b.",
+    "explanations" : "You need to use a simple function you already used twice ! And you can use the option deparse.level = 2 to see which column corresponds to which variable. (From here, you passed to the 2nd part of this tutorial, statistical test on binary variables. You can stop the tutorial and go back here using the sidebar.)",
+    "validation" : ["table","Mai_depression\\.b","Mai_anxiete\\.b"],
+    "solution" : "table(data$Mai_depression.b, data$Mai_anxiete.b, deparse.level=2)",
+    "conclusion" : "What do you see ? How do you interprete that ?",
+    "questions" : [
+      {
+        "question" : "How many people have both depression and anxiety ?",
+        "options" : ["173", "318", "28", "229"],
+        "correct" : 4
+      },
+      {
+        "question" : "How many people have depression but not anxiety ?",
+        "options" : ["173", "318", "28", "229"],
+        "correct" : 3
+      },
+      {
+        "question" : "What does the option useNA = 'always'",
+        "options" : ["It adds a column for the empty values", "It ignores empty values", "It is not well used as useNA is a boolean option"],
+        "correct" : 1
+      }
+    ]
+  },
+  {
+    "id": "pic_OR",
+    "instruction" : "🔹 Does someone depressed is more likely anxious in May ?",
+    "explanations" : "Find the Relative Risk and Odds Ratio. Use the twoby2 function. Watch out: first, the order count, and second, it considers that 0 is sick and 1 is not. You can use it like that : twoby2(outcome, exposure). To answer correctly to the questions, here are some informations about the smcovid.csv dataset.",
+    "validation" : ["twoby2", "1\\s*-","Mai_anxiete\\.b.*Mai_depression\\.b"],
+    "solution" : "twoby2(1- data$Mai_anxiete.b, 1 - data$Mai_depression.b)",
+    "questions" : [
+      {
+        "question" : "What is the rounded relative risk (RR) observed in the sample ?",
+        "options" : ["1.4", "1.5", "2.1", "3.0"],
+        "correct" : 4
+      },
+      {
+        "question" : "And the odds ratio (OR) ? ",
+        "options" : ["4.4", "2.8", "6.9", "0.3"],
+        "correct" : 1
+      },
+      {
+        "question" : "What information does it gives you ? ",
+        "options" : ["The relation strength between 2 continuous var", "The relation strength between 2 binary var"],
+        "correct" : 2
+      },
+      {
+        "question" : "Why are they different ?",
+        "options" : ["It gives 2 different pieces of information", "The prevalence of the disease is not low, ow they would've been the same", "It depends on the sample size"],
+        "correct" : 2,
+        "cl" : "OR is always accurate and is almost the same as RR iif the disease is not frequent (<5%). Then, RR cannot be used in a case control study (same amount of sick and non-sick people)."
+      },
+      {
+        "question" : "Which one should we watch in our situation ?",
+        "options" : ["OR", "RR", "None of them"],
+        "correct" : 2
+      },
+      {
+        "question" : "Why ?",
+        "options" : ["Because it is easier to interpret", "Because it's a case control study (same amount of sick / non-sick in the sample)"],
+        "correct" : 1,
+        "cl" : "Depressed people are 3 times more likely to be anxious."
+      }
+    ]
+  },
+  {
+    "instruction" : "🔹 What is the percentage of depressed people according to their anxiousness ?",
+    "explanations" : "Try to add an option to the proportion function (you already used it, will you remember ?], 1, or 2, and see what changes.",
+    "validation" : ["prop\\.table\\(", "Mai_anxiete\\.b", "Mai_depression\\.b"],
+    "solution" : "prop.table(table(data$Mai_anxiete.b, data$Mai_depression.b, deparse.level=2], 1)*100",
+    "conclusion" : "But are these informations statistically relevant for the whole population ?",
+    "questions" : [
+      {
+        "question" : "What changes the option 1 ?",
+        "options" : ["Nothing", "Percentages are given according to the lines and not the whole", "Percentages are given according to the columns and not the whole"],
+        "correct" : 2
+      },
+      {
+        "question" : "What is the percentage of depressed people if the person is anxious ? (Let's call the result a)",
+        "options" : ["30.6%", "41.9%", "42.5%", "58.1%", "89.1%"],
+        "correct" : 2
+      },
+      {
+        "question" : "What does it means ?",
+        "options" : ["If a person is anxious, there are a% chance it is depressed", "If a person is depressed, there are a% chance it is anxious", "If a person is anxious, there are a% chance it is not depressed", "If a person is depressed, there are a% chance it is not anxious"],
+        "correct" : 1
+      },
+      {
+        "question" : "If the person is not anxious ?",
+        "options" : ["3.7%", "10.9%", "13.9%", "23.1%"],
+        "correct" : 3
+      },
+      {
+        "question" : "And the chance a person is anxious if it is depressed ?",
+        "options" : ["30.6%", "41.9%", "42.5%", "58.1%", "89.1%"],
+        "correct" : 5
+      },
+      {
+        "question" : "With which test can you be sure there is really a difference of prevalence of depression between anxious and non anxious people ?",
+        "options" : ["Chi-2 test (chisq.test)", "Student t test (t.test)", "McNemar test (mcnemar.test)", "Wilcoxon t test (wilcox.test)"],
+        "correct" : 1
+      }
+    ]
+  },
+  {
+    "instruction" : "🔹 Before conducting this chi-2 test (with the function chisq.test], let's have some informations about statistical tests... Try to remember them for the next steps !",
+    "explanations" : "You've got 2 main possible approaches to conduct a statistical test, that are Fisher on one side, and Neyman & Pearson on the other side. They are both used in real case studies. According to Neyman & Pearson, when validating or non validating an hypothesis, there are 2 possible risks: alpha (the probability to accept H1 whereas H0, the status quo, is true) and beta (the probability to reject H1 whereas it was true). We try then to minimize alpha and beta (and specially alpha, which is the 'worst'). We fix the value of alpha to a threshold, and we observe the p-value: if it respects this threshold, H1 is accepted, otherwise it's not. For instance, when you conduct a test to know wether a drug is more efficace than another, you habitually use this method. Answer to the questions and execute an empty code to validate it.",
+    "validation" : [],
+    "solution" : " ",
+    "questions" : [
+      {
+        "question" : "Why do we conduct statistical tests ?",
+        "options" : ["Additionnally to other discoveries to cross the obtained value", "To make sure the discoveries are not by chance"],
+        "correct" : 2
+      },
+      {
+        "question" : "What is the p-value used for ?",
+        "options" : ["To confirm with a high level of certitude that the results cannot be explained just with luck",
+                    "To obtain the probability the results are not based on luck"],
+        "correct" : 1,
+        "cl" : "p is the probability that chance alone can explain a difference at least as large as the one observe. It depends a lot on the size of the sample."
+      },
+      {
+        "question" : "Habitually, with Neyman & Pearson approach, which value needs to be p for the test to be relevant (the threshold we talked about) ?",
+        "options" : ["More than 50%","More than 5%", "Less than 5%", "Less than 1%"],
+        "correct" : 3
+      },
+      {
+        "question" : "What is the difference between the Fisher and the Neyman & Pearson approach ?",
+        "options" : [
+          "Neyman & Person shows the strength of the conclusion",
+          "Neyman & Pearson has a continuous result, Fisher a binary one",
+          "Neyman & Pearson has a binary result, Fisher a continuous one"
+        ],
+        "correct" : 3,
+        "cl" : "On the contrary of Neyman & Pearson, Fisher's approach is considering the more p is low the more the test is relevant."
+      }
+    ]
+  },
+  {
+    "instruction" : "🔹 Let's conduct a chi-2 test to see the difference of prevalence of depression between anxious and non anxious people in May.",
+    "explanations" : "Add the option correct = FALSE, otherwise R conducts a continuous test.",
+    "validation" : ["chisq\\.test\\(", "Mai_anxiete\\.b", "Mai_depression\\.b"],
+    "solution" : "chisq.test(data$Mai_anxiete.b, data$Mai_depression.b, correct=F)",
+    "questions" : [
+      {
+        "question" : "What are the validation criteria to use the Chi-2 test ?",
+        "options" : ["Big sample & the percentages to compare are not too close to 100 or 0",
+                    "Big sample or normal distribution",
+                    "Big difference between the amount of sick and non sick people",
+                    "None"],
+        "correct" : 1,
+        "cl" : "Btw, a binary variable cannot follow a normal distribution :)"
+      },
+      {
+        "question" : "If they are not followed, which test should you use ?",
+        "options" : ["Student t test (t.test)", "Fisher's exact test (fisher.test)", "Welch's appr t test (t.test)", "Pearson's correlation coef (cor.test)"],
+        "correct" : 2
+      },
+      {
+        "question" : "Let's consider 3 p-values : p1 = 0.1%, p2 = 4.9%, p3 = 5.1%. What does it means for a Fisher approach ?",
+        "options" : ["p1 is more relevant than p2 or p3 (which are equivalent)",
+                    "p2 or p3 (which are equivalent) are more relevant than p1",
+                    "p1 and p2 (which are equivalent) are relevant, p3 is not",
+                    "p3 is relevant, p1 and p2 (which are equivalent) are not"],
+        "correct" : 1
+      },
+      {
+        "question" : "For Neyman and Pearson ?",
+        "options" : ["p1 is more relevant than p2 or p3 (which are equivalent)",
+                    "p2 or p3 (which are equivalent) are more relevant than p1",
+                    "p1 and p2 (which are equivalent) are relevant, p3 is not",
+                    "p3 is relevant, p1 and p2 (which are equivalent) are not"],
+        "correct" : 3,
+        "cl" : "Did you get the difference ?"
+      },
+      {
+        "question" : "What is the relevance of the result according to Fisher ?",
+        "options" : ["Very relevant", "Quite relevant", "Not that much relevant", "Not relevant"],
+        "correct" : 1
+      }
+    ]
+  },
+  {
+    "id" : "continuous_test",
+    "instruction" : "🔹 Plot a boxplot of age according to anxiety (in May).",
+    "explanations" : "Try the structure varA~varB which means varA comparing to varB.",
+    "validation" : ["boxplot\\(.*\\$age~.*\\$Mai_anxiete"],
+    "solution" : "boxplot(data$age~data$Mai_anxiete.b)",
+    "questions" : [
+      {
+        "question" : "What do you see about the sample ?",
+        "options" : ["On average, youngest people are more anxious", "On average, oldest people are more anxious", "On average, anxious people are older", "On average, anxious people are younger", "It seems to be more or less the same between anxious and non anxious people"],
+        "correct" : 4
+      },
+      {
+        "question" : "What test should we conduct to see if this discovery is reliable or not for the whole population ?",
+        "options" : ["Chi-2 test (chisq.test)", "Student t test (t.test)", "McNemar test (mcnemar.test)", "Fisher's exact test (fisher.test)"],
+        "correct" : 2
+      },
+      {
+        "question" : "What is NOT one of the validation criteria ?",
+        "options" : ["Size of the sample big enough", "The continuous variable follows a normal distribution", "The variances between the 2 sub-samples are equal", "There are all validation criteria"],
+        "correct" : 4
+      },
+      {
+        "question" : "Welch's approximation t test (t.test) allows to compare 2 means too. What is NOT one of the validation criteria for this test ?",
+        "options" : ["Size of the sample big enough", "The continuous variable follows a normal distribution", "The variances between the 2 sub-samples are equal", "There are all validation criteria"],
+        "correct" : 3
+      },
+      {
+        "question" : "There is still another test that compares 2 means, called Wilcoxon (wilcox.test). This one has no validation criteria. Then, why should we chose another test ?",
+        "options" : ["It does not compare average but ranks of individuals", "You cannot use any other method that needs a normal distribution", "Both"],
+        "correct" : 3
+      }
+    ]
+  },
+  {
+    "instruction" : "🔹 Are the variance of the 2 subsamples equal ? Use the function by",
+    "explanations" : "We learnt how to compare 2 percentages (binary variables). We now want to compare 2 means (continuous variable) (here, the age of those who suffer from anxiete in May and those who didn't).",
+    "validation" : ["by", "\\$Mai_anxiete\\.b", "\\$age", "\\b(sd|var)\\b"],
+    "solution" : "by(data$age, data$Mai_anxiete.b, sd, na.rm=T)",
+    "questions" : [
+      {
+        "question" : "Is the size of the sample big enough ?",
+        "options" : ["Yes", "No"],
+        "correct" : 1
+      },
+      {
+        "question" : "Remember about the histogram you plotted at the beggining (you can plot it again) ? We said we can consider age follows a normal distribution. Why ?",
+        "options" : ["We recognized the bell shape of a normal distribution", "Frequency strictly increased and then decreased", "Frequency is not constant"],
+        "correct" : 2,
+        "cl" : "There is another test that can say if it follows a normal distribution : qqnorm(data$age); qqline(data$age). If all the dots are above the line, it's ok, otherwize it's not."
+      },
+      {
+        "question" : "Are the variance of the 2 subsamples equal ? ",
+        "options" : ["Yes", "Not totally, but we can consider as so", "No"],
+        "correct" : 3
+      },
+      {
+        "question" : "Then in our case, which test should we conduct ?",
+        "options" : ["Student t test (t.test)", "Welch's appr t test (t.test)", "Wilcoxon test (wilcox.test)"],
+        "correct" : 2
+      }
+    ]
+  },
+  {
+    "instruction" : "🔹 On average, is there a significant age difference between someone that suffers from anxiete and someone who don't ?",
+    "explanations" : "Perform a Welch's appr t test. In these test, you need to use the varA~varB structure.",
+    "validation" : ["t\\.test\\(.*\\$age~.*\\$Mai_anxiete\\.b", "var\\.equal"],
+    "solution" : "t.test(data$age~data$Mai_anxiete.b)",
+    "questions" : [
+      {
+        "question" : "Remembered a student t test uses the same function ? But what changes ?",
+        "options" : ["R knows if the variances are equal or not automatically, you don't have to change anything", "You add the option method='student'", "You add the option var.equal = TRUE"],
+        "correct" : 3
+      },
+      {
+        "question" : "What piece of information does this function NOT gives you ?",
+        "options" : ["The p-value", "The mean of the 2 groups", "The variance of the 2 groups"],
+        "correct" : 3
+      },
+      {
+        "question" : "What can you say about the result ?",
+        "options" : ["The 2 means are statistically different", "The 2 means are different but it is not a statistical difference", "The 2 means are statistically different according to Neyman & Pearson but not Fisher"],
+        "correct" : 1
+      },
+      {
+        "question" : "Does this confirm the observation you did based on the boxplots ?",
+        "options" : ["Yes", "No"],
+        "correct" : 1
+      }
+    ],
+    "conclusion" : "Another thing you can see with the t.test is a difference with an integer."
+  },
+  {
+    "instruction" : "🔹 Does my sample represents well my population in age ?",
+    "explanations" : "You can perform a One sample t-test using the same function with the option mu. Let's consider our population is the United States inhabitants. The average age there is 38 years old.",
+    "validation" : ["t\\.test\\(.*\\$age,\\s*mu.*38\\)"],
+    "solution" : "t.test(data$age, mu=38)",
+    "questions" : [
+      {
+        "question" : "Can we say the sample represents well my population in age ?",
+        "options" : ["Yes, the sample has the same mean", "Yes, it's inside the 95CI", "No, it's not too far but is still different", "No because the result is not statistically relevant"],
+        "correct" : 4
+      },
+      {
+        "question" : "Can we say the sample does not represent well my population in age ? (Tip: use =!).",
+        "options" : ["Yes, the means are statistically different", "No, the sample's mean is inside the 95CI", "No because the result is not statistically relevant"],
+        "correct" : 2
+      }
+    ]
+  },
+  {
+    "instruction" : "🔹 What is the correlation between age and the number of childs (n.enfant) ?",
+    "explanations" : "The correlation gives you a clue about the strength of association between 2 variables. You can help you with the questions.",
+    "validation" : ["cor", "\\$n\\.enfant", "\\$age"],
+    "solution" : "cor(data$n.enfant, data$age, use = 'complete.obs')",
+    "questions" : [
+      {
+        "question" : "What option do you need to use to avoid empty values ?",
+        "options" : ["use = 'remove.na'", "useNA = FALSE", "use = 'complete.obs'", "na.rm = TRUE"],
+        "correct" : 3
+      },
+      {
+        "question" : "What is r if it is a complete dependence between the 2 var ?",
+        "options" : ["+inf", "+/-inf", "0", "1", "+/-1"],
+        "correct" : 5,
+        "cl" : "The correlation coefficient r is in [-1,1]. A correlation of 1 or -1 means the 2 variables are mutually determined : knowing one gives the other."
+      },
+      {
+        "question" : "What does r=0 means about the 2 variables ?",
+        "options" : ["They are mutually determined", "They are totally independant", "It's not enough to say anything"],
+        "correct" : 3,
+        "cl" : "They are independant iif they both follow a normal distribution. Otherwise, as the Pearson correlation looks at a linear correlation, they can still be dependant (quadratic relationship or concordance)."
+      },
+      {
+        "question" : "Is the obtained correlation statistically relevant ?",
+        "options" : ["Yes", "No", "We don't know"],
+        "correct" : 3,
+        "cl" : "We don't have any information about the p-value or an 95CI."
+      }
+    ],
+    "conclusion" : "Let's see if the correlation is statistically relevant."
+  },
+  {
+    "instruction" : "🔹 Perform a test of nullity",
+    "explanations" : "The objective is to see wether the correlation between age and the number of childs exists or not. Use the function cor.test()",
+    "validation" : ["cor\\.test", "\\$n\\.enfant", "\\$age"],
+    "solution" : "cor.test(data$n.enfant, data$age)",
+    "questions" : [
+      {
+        "question" : "What is the validation criteria to perform this test ?",
+        "options" : ["The variables follow a normal distribution", "At least one of the variables follows a normal distribution", "The variance of the 2 variables are equal", "The sample is big enough"],
+        "correct" : 2
+      },
+      {
+        "question" : "In our case, was it ok to perform this test ?",
+        "options" : ["Yes", "No"],
+        "correct" : 1
+      },
+      {
+        "question" : "If not, which test should we use ?",
+        "options" : ["Linear correlation", "Pearson's product-moment correlation", "Spearman rank correlation", "Neyman correlation"],
+        "correct" : 3,
+        "cl" : "The name of the test you performed is the Pearson's product-moment correlation. If it doesn't follow the validation criteria, you can use the Spearman rank correlation. You will use the same function cor.test but with the option method = 'spearman'."
+      },
+      {
+        "question" : "So, why can we say the correlation obtained is statistically relevant ?",
+        "options" : ["Because the 95CI exclude 0", "Because the correlation is in between the 95CI", "Because the p-value is very close to 0", "Because the p-value is enough far from 0"],
+        "correct" : 3,
+        "cl" : "By the way, the correlation is always in between the 95CI as it is centered in r."
+      }
+    ]
+  },
+  {
+    "instruction" : "🔹 Compares the anxiete before and after the confinement (in May vs in October. Oct_anxiete.b has been created)",
+    "explanations" : "Another type of test you can perform is the paired test. It compares the same thing before and after sth happens. It takes into account that each patient is its own control data. Use the questions to help you.",
+    "validation" : ["mcnemar\\.test", "\\$Mai_anxiete", "\\$Oct_anxiete"],
+    "solution" : "mcnemar.test(data$Mai_anxiete.b, data$Oct_anxiete.b)",
+    "questions" : [
+      {
+        "question" : "To compare 2 binary values, which chi-2 test should we use ?",
+        "options" : ["Chi-2 test (chisq.test)", "Student t test (t.test)", "McNemar test (mcnemar.test)", "Fisher's exact test (fisher.test)"],
+        "correct" : 3
+      },
+      {
+        "question" : "To compare 2 quantitative values, which test should we use ?",
+        "options" : ["Chi-2 test (chisq.test)", "Student t test (t.test)", "McNemar test (mcnemar.test)", "Fisher's exact test (fisher.test)"],
+        "correct" : 2,
+        "cl" : "Yes, again ! You need to put the option paired to True"
+      }
+    ]
+  },
+  {
+    "id" : "lm",
+    "instruction" : "🔹 We would like to know if there is a linear regression between age and weight gain. Use a plot for the first visualization.",
+    "explanations" : "Help you with the questions.",
+    "validation" : ["plot", "jitter\\(.*\\$age", "jitter\\(.*\\$Prise_Poids"],
+    "solution" : "plot(jitter(data$age], jitter(data$Prise_Poids))",
+    "questions" : [
+      {
+        "question" : "The function jitter is used to add jitter to the data. Why should we use it ?",
+        "options" : ["To be more accurate", "To add uncertainty", "To see every point in plots"],
+        "correct" : 3
+      },
+      {
+        "question" : "What is a linear model (a and b constants) ?",
+        "options" : ["varA = a*varB", "varA = a+b*varB", "varA = a+b*varB²"],
+        "correct" : 2
+      },
+      {
+        "question" : "We said earlier that a correlation is linear. Why should we perform a linear regression then ?",
+        "options" : ["They are complementary", "It is more interpretable", "It gives more precise information"],
+        "correct" : 2,
+        "cl" : "b and r are related with the function r = b*sd(A)/sd(B)"
+      },
+      {
+        "question" : "What is the function skeleton to create the linear model ?",
+        "options" : ["lm(varA~varB)", "lm(varA,varB)", "linear.mod(varA~varB)", "linear.mod(varA,varB)"],
+        "correct" : 1
+      }
+    ]
+  },
+  {
+    "instruction" : "🔹 Create the linear model of weight gain according to age and stock it in mod1.",
+    "validation" : ["mod1", "lm\\(.*\\$Prise_Poids~.*\\$age"],
+    "solution" : "mod1 <- lm(data$Prise_Poids~data$age)",
+    "questions" : [
+      {
+        "question" : "With which function can you add a line on a plot ?",
+        "options" : ["abline", "addline", "linear", "add"],
+        "correct" : 1
+      },
+      {
+        "question" : "Which information does mod1 carry ?",
+        "options" : ["a and b", "a p-value", "both", "none of them"],
+        "correct" : 3,
+        "cl" : "You can have the p-value with the function summary."
+      },
+      {
+        "question" : "Is rounded b:",
+        "options" : ["4.13", "0.145", "0.06", "closest to 0"],
+        "correct" : 3
+      },
+      {
+        "question" : "Then, what can you say about b ?",
+        "options" : ["It is neglectable", "It is different from 0", "We don't know yet"],
+        "correct" : 3
+      },
+      {
+        "question" : "What does this mean ?",
+        "options" : ["If we gain 1kg we are b years older", "If we are 1 year older we gain b kg", "None of them"],
+        "correct" : 2
+      }
+    ]
+  },
+  {
+    "instruction" : "🔹 Add mod1 to the plot.",
+    "validation" : ["mod1", "abline\\("],
+    "solution" : "abline(mod1)",
+    "questions" : [
+      {
+        "question" : "With which option can you get the line thicker ?",
+        "options" : ["thick", "thickness", "lwd", "size"],
+        "correct" : 3
+      },
+      {
+        "question" : "Does the weight gain seem to be linked to the age ?",
+        "options" : ["Yes", "No", "It's hard to say"],
+        "correct" : 1
+      },
+      {
+        "question" : "Does it correlates with b obtained before ?",
+        "options" : ["Yes", "No"],
+        "correct" : 1
+      }
+    ]
+  },
+  {
+    "instruction" : "🔹 Are we sure that b is different from 0 ?",
+    "explanations" : "Try the summary function on mod1.",
+    "validation" : ["mod1", "summary\\("],
+    "solution" : "summary(mod1)",
+    "questions" : [
+      {
+        "question" : "What do yo obtain ?",
+        "options" : ["The p-value", "The 95CI", "Different possibilities for a and b"],
+        "correct" : 1
+      },
+      {
+        "question" : "So, what can you say about b ?",
+        "options" : ["It is neglectable", "It is different from 0", "We don't know yet"],
+        "correct" : 2
+      }
+    ]
+  }
+]
