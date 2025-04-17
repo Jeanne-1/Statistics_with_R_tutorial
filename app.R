@@ -16,17 +16,25 @@ generate_reactive_string <- function(valid_expr, default_expr) {
 
 
 ui <- page_fluid(
-  card(
+  layout_sidebar(
+    sidebar = sidebar(
+      open = "closed",
+      title = "Go straight to what interest you :",
+      actionButton("intro", "Go back to the beggining"),
+      actionButton("binar_test", "Statistical tests with 2 binary var"),
+      actionButton("continuous_test", "Statistical tests with continuous var"),
+      actionButton("lm", "Linear Regression")
+      ),
+  
     titlePanel("Statistics with R for begginers"),
     uiOutput("progress_bar"),
     
     # Instructions
     uiOutput("instructions"),
-    textOutput("explanations")
-  ),
+    textOutput("explanations"),
+  
   
   layout_columns(
-    col_width=3,
     card(
       # Zone de saisie pour entrer du code
       uiOutput("code_input_ui"),
@@ -61,45 +69,65 @@ ui <- page_fluid(
                DTOutput("values_memory")
         )
       )
-    )
+    ))
   ),
   
-  # Résultat du code exécuté
-  verbatimTextOutput("execution_output"),
-  
-  plotOutput("user_plot") # AFFICHER LA ZONE SLMT S'IL Y A UN PLOT ET PAS OUTPUT
+  layout_columns(
+    # Résultat du code exécuté
+    verbatimTextOutput("execution_output"),
+    
+    plotOutput("user_plot") # AFFICHER LA ZONE SLMT S'IL Y A UN PLOT ET PAS OUTPUT
+  )
 )
 
 server <- function(input, output, session) {
   
   # suppression de toutes les variables globales
   rm(list = ls(envir = .GlobalEnv), envir = .GlobalEnv)
+  assign("a", "This is a sentence", envir = .GlobalEnv)
+  assign("b", -27L, envir = .GlobalEnv)
+  assign("name", data("mtcars"), envir = .GlobalEnv)
   
   # Liste des étapes du tutoriel
   steps <- list(
     list(
       instruction = "Welcome in this tutorial to learn how to use R for statistics !",
-      explanations = "Let's discover the dataset 'smcovid' together ! But before we start, let discover your environment...",
-      validation = function() {TRUE},
-      solution = "You can try anything !",
+      explanations = "Let's discover the dataset 'smcovid' together ! But before we start, let's discover your environment...",
+      validation = function() {
+        grepl("rm", input$code_input)
+      },
+      solution = "Answer to the questions, and you'll know what to write...",
       questions = list(
+        list(
+          question = "You will have some questions to answer here before being able to go to the next page. Got it ? (Answer should be yes ;))",
+          options = c("Yes", "No", "The answer D"),
+          correct = "Yes"
+        ),
         list(
           question = "You can type anything in the left side. If you type on execute, it will launch your piece of code in the console. What does 2+2 displays ?",
           options = c("Nothing", "4", "0"),
           correct = "4"
         ),
         list(
-          question = "You will have some questions to answer here before being able to go to the next page. Got it ?",
-          options = c("Yes", "No", "The answer D"),
-          correct = "Yes"
-        ),
-        list(
           question = "What is on your right ?",
           options = c("All the previous code parts I launched", "All the data I stocked", "Just random things"),
-          correct = "All the data I stocked"
+          correct = "All the data I stocked",
+          cl = "You can have additional information about your questions here :)"
+        ),
+        list(
+          question = "We stocked some variables inside... Can you tell me what type is b ?",
+          options = c("Integer", "Character", "Dataset", "Other"),
+          correct = "Integer"
+        ),
+        list(
+          question = "What is the size of mtcars ?",
+          options = c("10*18","11*32", "18*32", "10*11"),
+          correct = "11*32",
+          cl = "Delete variables from your environment with rm(list = ls()). Try it !"
         )
       ),
-      conclusion = "Let's start serious things !!"
+      conclusion = "Let's start serious things !! Don't forget, you can go from questions to code whenever you want. 
+      There are 2 validations needed to go to the next question : the code and the QCM. The code verification is only done once, which means, if it is validated once it will be validated forever and you can change the code you want to launch."
     ),
     list(
       instruction = "🔹 Upload data from the file 'smcovid.csv' and stock it in the variable of your choice (data for instance).",
@@ -178,10 +206,10 @@ server <- function(input, output, session) {
         ),
         list(
           question = "You can see Mai_anxiete goes from 0 to 3. What do you think it means ?",
-          options = c("A number of day in May the person feeled anxious", "A rank from not feeling anxious to really feels anxious"),
+          options = c("A number of day in May the person felt anxious", "A rank from not feeling anxious to really feels anxious"),
           correct = "A rank from not feeling anxious to really feels anxious",
           cl = "Normally, you can have these pieces of information in the annotations. However, if it is not available, there are some things you can guess. \n
-          For instance, for a binay variable, 0 usually means no and 1 means yes."
+          For instance, for a binary variable, 0 usually means no and 1 means yes."
         )
       )
     ),
@@ -393,19 +421,20 @@ server <- function(input, output, session) {
       questions = list(
         list(
           question = "Which method should you use to do so ?",
-          options = c("Delete the 1 and 2 from Mai_depression", "0 will be for Mai_depression is 0 or 1 ; 1 for Mai_depression is 2 or 3", "Another method"),
+          options = c("Delete the 1 and 2 from Mai_depression", "0 for Mai_depression is 0 or 1 ; 1 for Mai_depression is 2 or 3", "Another method"),
           correct = "0 will be for Mai_depression is 0 or 1 ; 1 for Mai_depression is 2 or 3",
           cl = "Use the function ifelse(condition, if true, if false)."
         ),
         list(
           question = "Why do you want to create a binary variable ?",
-          options = c("To conduct tests on percentages", "For explainability", "To have simpler tests"),
-          correct = "To conduct tests on percentages"
+          options = c("To conduct tests especially on binary variables (on percentage)", "For explainability", "To have simpler tests"),
+          correct = "To conduct tests especially on binary variables (on percentage)"
         )
       )
     ),
     # A PARTIR D'ICI, PLUS DE SOLUTIONS ADAPTATIVES
     list(
+      id = "binar_test",
       instruction = "🔹 Display a confusion matrix of Mai_depression.b and Mai_anxiete.b.",
       explanations = "Remember, you already used this function twice ! And you can use the option deparse.level = 2 to see which column corresponds to which variable.",
       validation = function() {
@@ -463,8 +492,8 @@ server <- function(input, output, session) {
         ),
         list(
           question = "Why are they different ?",
-          options = c("It gives 2 different pieces of information", "The prevalence of the disease is not low", "It depends on the sample size"),
-          correct = "The prevalence of the disease is not low",
+          options = c("It gives 2 different pieces of information", "The prevalence of the disease is not low, ow they would've been the same", "It depends on the sample size"),
+          correct = "The prevalence of the disease is not low, ow they would've been the same",
           cl = "OR is almost the same as RR iif the disease is not frequent (<5%)."
         ),
         list( # AJOUTER UNE PIC DE what is OR et RR
@@ -483,7 +512,7 @@ server <- function(input, output, session) {
     ),
     list(
       instruction = "🔹 What is the percentage of depressed people according to their anxiousness ?",
-      explanations = "Try to add an option, 1, or 2, and see what changes.",
+      explanations = "Try to add an option to the proportion function (you already used it, will you remember ?), 1, or 2, and see what changes.",
       validation = function() {
         if (grepl("prop\\.table\\(", input$code_input)
             & grepl("Mai_anxiete\\.b", input$code_input)
@@ -494,7 +523,12 @@ server <- function(input, output, session) {
       conclusion = "But are these informations statistically relevant for the whole population ?",
       questions = list(
         list(
-          question = "If the person is anxious ? (Let's call the result a)",
+          question = "What changes the option 1 ?",
+          options = c("Nothing", "Percentages are given according to the lines and not the whole", "Percentages are given according to the columns and not the whole"),
+          correct = "Percentages are given according to the lines and not the whole"
+        ),
+        list(
+          question = "What is the percentage of depressed people if the person is anxious ? (Let's call the result a)",
           options = c("30.6%", "41.9%", "42.5%", "58.1%", "89.1%"),
           correct = "41.9%"
         ),
@@ -515,21 +549,21 @@ server <- function(input, output, session) {
         ),
         list(
           question = "With which test can you be sure there is really a difference of prevalence of depression between anxious and non anxious people ?",
-          options = c("Chi-2 test", "Student t test", "McNemar test", "Wilcoxon t test"),
-          correct = "Chi-2 test"
+          options = c("Chi-2 test (chisq.test)", "Student t test (t.test)", "McNemar test (mcnemar.test)", "Wilcoxon t test (wilcox.test)"),
+          correct = "Chi-2 test (chisq.test)"
         )
       )
     ),
     list(
-      instruction = "🔹 Conduct a chi-2 test.",
-      explanations = "Add the option correct = F, otherwise R conducts a continuous test.",
-      validation = function() {
-        if (grepl("chisq\\.test\\(", input$code_input)
-            & grepl("Mai_anxiete\\.b", input$code_input)
-            & grepl("Mai_depression\\.b", input$code_input)) T
-        else F
-      },
-      solution = "chisq.test(data$Mai_anxiete.b, data$Mai_depression.b, correct=F)",
+      instruction = "🔹 Before conducting this chi-2 test (with the function chisq.test), let's have some informations about statistical tests... Try to remember them for the next steps !",
+      explanations = "You've got 2 main possible approaches to conduct a statistical test, that are Fisher on one side, and Neyman & Pearson on the other side. They are both used in real case studies. 
+            According to Neyman & Pearson, when validating or non validating an hypothesis, there are 2 possible risks:
+            alpha (the probability to accept H1 whereas H0, the status quo, is true) and beta (the probability to reject H1 whereas it was true).
+            We try then to minimize alpha and beta (and specially alpha, which is the 'worst'). We fix the value of alpha to a threshold,
+            and we observe the p-value: if it respects this threshold, H1 is accepted, otherwise it's not. For instance, when you conduct a test to know wether a drug is more efficace than another, you habitually use this method.
+            Answer to the questions and execute an empty code to validate it.",
+      validation = function() {T},
+      solution = " ",
       questions = list(
         list(
           question = "Why do we conduct statistical tests ?",
@@ -545,6 +579,34 @@ server <- function(input, output, session) {
           cl = "p is the probability that chance alone can explain a difference at least as large as the one observe. It depends a lot on the size of the sample."
         ),
         list(
+          question = "Habitually, with Neyman & Pearson approach, which value needs to be p for the test to be relevant (the threshold we talked about) ?",
+          options = c("More than 50%","More than 5%", "Less than 5%", "Less than 1%"),
+          correct = "Less than 5%"
+        ),
+        list(
+          question = "What is the difference between the Fisher and the Neyman & Pearson approach ?",
+          options = c(
+            "Neyman & Person shows the strength of the conclusion",
+            "Neyman & Pearson has a continuous result, Fisher a binary one",
+            "Neyman & Pearson has a binary result, Fisher a continuous one"
+          ),
+          correct = "Neyman & Pearson has a binary result, Fisher a continuous one",
+          cl = "On the contrary of Neyman & Pearson, Fisher's approach is considering the more p is low the more the test is relevant."
+        )
+      )
+    ),
+    list(
+      instruction = "🔹 Let's conduct a chi-2 test to see the difference of prevalence of depression between anxious and non anxious people in May.",
+      explanations = "Add the option correct = F, otherwise R conducts a continuous test.",
+      validation = function() {
+        if (grepl("chisq\\.test\\(", input$code_input)
+            & grepl("Mai_anxiete\\.b", input$code_input)
+            & grepl("Mai_depression\\.b", input$code_input)) T
+        else F
+      },
+      solution = "chisq.test(data$Mai_anxiete.b, data$Mai_depression.b, correct=F)",
+      questions = list(
+        list(
           question = "What are the validation criteria to use the Chi-2 test ?",
           options = c("Big sample & the percentages to compare are not too close to 100 or 0",
                       "Big sample or normal distribution",
@@ -557,27 +619,6 @@ server <- function(input, output, session) {
           question = "If they are not followed, which test should you use ?",
           options = c("Student t test (t.test)", "Fisher's exact test (fisher.test)", "Welch's appr t test (t.test)", "Pearson's correlation coef (cor.test)"),
           correct = "Fisher's exact test (fisher.test)"
-        ),
-        list(
-          question = "What is the difference between the Fisher and the Neyman & Pearson approach ?",
-          options = c(
-            "Neyman & Person shows the strength of the conclusion",
-            "Neyman & Pearson has a continuous result, Fisher a binary one",
-            "Neyman & Pearson has a binary result, Fisher a continuous one"
-          ),
-          correct = "Neyman & Pearson has a binary result, Fisher a continuous one",
-          cl = {
-            "According to Neyman & Pearson, when validating or non validating an hypothesis, there are 2 possible risks:
-            alpha (the probability to accept H1 whereas H0, the status quo, is true) and beta (the probability to reject H1 whereas it was true).
-            We try then to minimize alpha and beta (and specially alpha, which is the 'worst'). We fix the value of alpha to a threshold,
-            and we observe the p-value: if it respects this threshold, H1 is accepted, otherwise it's not.
-            On the contrary, Fisher's approach is considering the more p is low the more the test is relevant."
-          }
-        ),
-        list(
-          question = "Habitually, with Neyman & Pearson approach, which value need to be p for the test to be relevant ?",
-          options = c("More than 50%","More than 5%", "Less than 5%", "Less than 1%"),
-          correct = "Less than 5%"
         ),
         list(
           question = "Let's consider 3 p-values : p1 = 0.1%, p2 = 4.9%, p3 = 5.1%. What does it means for a Fisher approach ?",
@@ -604,6 +645,7 @@ server <- function(input, output, session) {
       )
     ),
     list(
+      id = "continuous_test",
       instruction = "🔹 Plot a boxplot of age according to anxiety (in May).",
       explanations = {"Try the structure varA~varB which means varA comparing to varB."},
       validation = function() {
@@ -819,6 +861,7 @@ server <- function(input, output, session) {
       )
     ),
     list(
+      id = "lm",
       instruction = "🔹 We would like to know if there is a linear regression between age and weight gain. Use a plot for the first visualization.",
       explanations = "Help you with the questions.",
       validation = function() {
@@ -982,7 +1025,7 @@ server <- function(input, output, session) {
   
   output$code_input_ui <- renderUI({
     step <- current_step()
-    rows <- ifelse(step > 4, 2, 1)  # Change X par le numéro de l'étape où il faut plus de place
+    rows <- ifelse(step > 5, 2, 1)  # Change X par le numéro de l'étape où il faut plus de place
     textAreaInput("code_input", "Type your code here :", rows = rows)
   })
   
@@ -1101,9 +1144,10 @@ server <- function(input, output, session) {
         output$user_plot <- renderPlot({
           eval(parse(text = user_code), envir = .GlobalEnv)
         })
-      } else {
-        output$user_plot <- renderPlot(NULL)  # Efface le graphique si aucun plot
-      }
+      } 
+      #else {
+        #output$user_plot <- renderPlot(NULL)  # Efface le graphique si aucun plot
+      #}
       
       # Vérification de la réponse
       if (validation_fn()) {
@@ -1149,9 +1193,56 @@ server <- function(input, output, session) {
     }
   })
   
+  observeEvent(input$intro, {
+    current_step(2)
+  })
+  
+  find_idx <- function(name) {which(sapply(steps, function(step) !is.null(step$id) && step$id == name))}
+  
+  binar_idx <- find_idx("binar_test")
+  continuous_idx <- find_idx("continuous_test")
+  lm_idx <- find_idx("lm")
+  
+  initialize_data_if_needed <- function() {
+    
+    if (!("data" %in% ls(envir = .GlobalEnv)) || !"Mai_depression" %in% names(data)) {
+      rm(list = ls(envir = .GlobalEnv), envir = .GlobalEnv)
+      assign("data", read.csv2("smcovid.csv"), envir = .GlobalEnv)
+    }
+    assign("tot", 748, envir = .GlobalEnv)
+    
+    if (!"Mai_depression.b" %in% names(get("data", envir = .GlobalEnv))) { # As they are created in the same step if one doesn't exist neither the other
+      data <- get("data", envir = .GlobalEnv)
+      tryCatch({
+        data$Mai_depression.b <- ifelse(data$Mai_depression >= 2, 1, 0)
+        data$Mai_anxiete.b <- ifelse(data$Mai_anxiete >= 2, 1, 0)
+        data$Oct_anxiete.b <- ifelse(data$Oct_anxiete >= 2, 1, 0)
+      }, error = function(e) {
+          print(e)
+        }
+      )
+      assign("data", data, envir = .GlobalEnv)
+    }
+  }
+  
+  
+  observeEvent(input$binar_test, {
+    current_step(binar_idx)
+    initialize_data_if_needed()
+  })
+  observeEvent(input$continuous_test, {
+    current_step(continuous_idx)
+    initialize_data_if_needed()
+  })
+  observeEvent(input$lm, {
+    current_step(lm_idx)
+    initialize_data_if_needed()
+  })
+  
   # Fonction pour récupérer les objets en mémoire
   get_memory_objects <- function() {
     objs <- ls(envir = .GlobalEnv)
+    objs <- objs[!sapply(objs, function(x) is.function(get(x, envir = .GlobalEnv)))]
     
     info <- lapply(objs, function(obj_name) {
       obj <- get(obj_name, envir = .GlobalEnv)
