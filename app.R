@@ -4,17 +4,6 @@ library(DT)
 library(Epi)
 library(psych)
 
-generate_reactive_string <- function(valid_expr, default_expr) {
-  reactive({
-    if (!is.null(df_name())) {
-      valid_expr
-    } else {
-      default_expr # Valeur par défaut si df_name() est NULL
-    }
-  })
-}
-
-
 ui <- page_fluid(
   layout_sidebar(
     sidebar = sidebar(
@@ -88,6 +77,14 @@ server <- function(input, output, session) {
   assign("b", -27L, envir = .GlobalEnv)
   assign("name", data("mtcars"), envir = .GlobalEnv)
   
+  delete_feedback <- function(){
+    updateTextAreaInput(session, "code_input", value = "")  # Réinitialisation du champ
+    output$feedback <- renderText("")  # Effacer les messages
+    output$execution_output <- renderText("")
+    output$questionnaire_cl <- renderText("")
+    updateActionButton(session, "next_step", disabled = TRUE)  # Désactiver "Suivant"
+  }
+  
   # Liste des étapes du tutoriel
   steps <- list(
     list(
@@ -138,7 +135,6 @@ server <- function(input, output, session) {
         if (length(dataframes) == 0) { # GERER L'ERREUR Erreur dans le code : type 'list' d'indice incorrect
           F
         }
-        df_name(dataframes[1]) # Stock the value in df_name()
         # if(dim(dataframes[1])!= c(748,33)) F
         T
       },
@@ -217,14 +213,15 @@ server <- function(input, output, session) {
       instruction = "🔹 How many features do you have for age ? Stock the value in tot.",
       explanations = "You can catch age with the formula data$age. Look at the right of the screen, there are all your variables available in your environment (the one you stocked in a variable).",
       validation = function() { # REGLER L'ERREUR cannot coerce type 'closure' to vector of type 'character'
-        if (!"tot" %in% ls(envir = .GlobalEnv)) return(FALSE)  # Vérifie si 'tot' existe
-        value <- get("tot", envir = .GlobalEnv)  # Récupère la valeur de 'tot'
-        return(is.numeric(value) && value == 748)  # Vérifie si c'est un nombre et vaut 748
+        # if (!"tot" %in% ls(envir = .GlobalEnv)) return(FALSE)  # Vérifie si 'tot' existe
+        # value <- get("tot", envir = .GlobalEnv)  # Récupère la valeur de 'tot'
+        # return(is.numeric(value) && value == 748)  # Vérifie si c'est un nombre et vaut 748
+        grepl("tot", input$code_input) &
+          grepl("table\\(", input$code_input) &
+          grepl("sum\\(", input$code_input) &
+          grepl("\\$age", input$code_input)
       },
-      solution = generate_reactive_string(
-        valid_expr = paste0("tot <- sum(table(", df_name(), "$age))"),
-        default_expr = "tot <- sum(table(data$age))"
-        ),
+      solution = "tot <- sum(table(data$age))",
       questions = list(
         list(
           question = "Why dim doesn't work with data$age ?",
@@ -253,8 +250,7 @@ server <- function(input, output, session) {
       instruction = "🔹 What is the mean of age for our sample ?",
       validation = function() {
         # AJOUTER UNE VERIFICATION DE TYPE
-        if (is.null(df_name())) return(FALSE)
-        expected_value <- mean(get(df_name(), envir = .GlobalEnv)$age, na.rm = TRUE) # calcul de la moyenne
+        expected_value <- mean(get("data", envir = .GlobalEnv)$age, na.rm = TRUE) # calcul de la moyenne
 
         # Capture et évalue la sortie utilisateur
         tryCatch({
@@ -269,10 +265,7 @@ server <- function(input, output, session) {
           return(FALSE)  # Retourne FALSE si une erreur survient
         })
       },
-      solution = generate_reactive_string(
-        valid_expr = paste0("mean(", df_name(), "$age)"),
-        default_expr = "mean(data$age)"
-      ),
+      solution = "mean(data$age)",
       conclusion = {
         "Now we know the mean of the age of the 748 people that conducted the study.
         But what about the mean age of our global population ? \n"
@@ -307,14 +300,10 @@ server <- function(input, output, session) {
       explanations = "Find the 95% confidence interval (95CI).",
       validation = function() {
         # AJOUTER UNE VERIFICATION DE TYPE
-        if (is.null(df_name())) return(FALSE)
         expected_value <- 36.90453
         # VERIFIER QUE A UN MOMENT DANS LA SORTIE CE CHIFFRE APPARAIT
       },
-      solution = generate_reactive_string(
-        valid_expr = paste0("mean(", df_name(), "$age)-1.96*sd(", df_name(), "$age)/sqrt(tot), mean(", df_name(), "$age)+1.96*sd(", df_name(), "$age)/sqrt(tot)"),
-        default_expr = "mean(data$age)-1.96*sd(data$age)/sqrt(tot), mean(data$age)+1.96*sd(data$age)/sqrt(tot)"
-        ),
+      solution = "mean(data$age)-1.96*sd(data$age)/sqrt(tot), mean(data$age)+1.96*sd(data$age)/sqrt(tot)",
       questions = list(
         list(
           question = "What does it mean ?",
@@ -337,13 +326,9 @@ server <- function(input, output, session) {
     list(
       instruction = "🔹 Draw a histogram of age.",
       validation = function() {
-        if (is.null(df_name())) return(F)
-        grepl(paste0("hist\\(", df_name(), "\\$age."), input$code_input)
+        grepl(paste0("hist\\(.*\\$age"), input$code_input)
       },
-      solution = generate_reactive_string(
-        valid_expr = paste0("hist(", df_name(), "$age)"),
-        default_expr = "hist(data$age)"
-      ),
+      solution = "hist(data$age)",
       conclusion = "Looking at the histogram can give you a clue whether the variable follows a normal distribution or not. What do you think ? \n",
       questions = list(
         list(
@@ -377,14 +362,9 @@ server <- function(input, output, session) {
       instruction = "🔹 Display the percentage of people that had depression in May.",
       explanations = "That is with Mai_depression==3",
       validation = function() {
-        if (is.null(df_name())) return(FALSE)
-        grepl(paste0("prop\\.table\\(table\\(", df_name(), "\\$Mai_depression\\s*==\\s*3\\)\\)\\s*\\*\\s*100"), input$code_input)
+        grepl(paste0("prop\\.table\\(table\\(\\s*data\\$Mai_depression\\s*==\\s*3\\)\\)\\s*\\*\\s*100"), input$code_input)
       },
-      solution = "prop.table(table(data$Mai_depression==3))*100", # CORRIGER CA
-      #   generate_reactive_string(
-      #   valid_expr = paste0("prop.table(table(", df_name(), "$Mai_depression==3))*100"),
-      #   default_expr = "prop.table(table(data$Mai_depression==3))*100"
-      # ),
+      solution = "prop.table(table(data$Mai_depression==3))*100",
       questions = list(
         list(
           question = "As for the total number of age records, you need to use multiple function. You already used the first one, about the second one, it allows numbers to become proportions. Can you guess which function is it ?",
@@ -407,16 +387,11 @@ server <- function(input, output, session) {
       instruction = "🔹 Let's create a binary variable, Mai_depression.b.",
       explanations = "Put the threshold at 1.5.",
       validation = function() {
-        if (is.null(df_name())) return(FALSE)
-        df <- get(df_name(), envir = .GlobalEnv)
+        df <- get("data", envir = .GlobalEnv)
         if (!"Mai_depression.b" %in% colnames(df)) return(FALSE)  # Vérifie si Mai_depression.b existe
         grepl(".Mai_depression\\s*(>=\\s*2|>\\s*1\\.?\\d*)", input$code_input) # Vérifie si le threshold est bien mis
       },
-      solution = "data$Mai_depression.b <- ifelse(data$Mai_depression >= 2, 1, 0)", # CORRIGER CA
-      # generate_reactive_string(
-      #   valid_expr = paste0(df_name(), "$Mai_depression.b <- ifelse(", df_name(), "$Mai_depression >= 2, 1, 0)"),
-      #   default_expr = "data$Mai_depression.b <- ifelse(data$Mai_depression >= 2, 1, 0)"
-      # ),
+      solution = "data$Mai_depression.b <- ifelse(data$Mai_depression >= 2, 1, 0)",
       conclusion= "Another binary variable has been created, Mai_anxiete.b. Let's see more about that.",
       questions = list(
         list(
@@ -436,7 +411,7 @@ server <- function(input, output, session) {
     list(
       id = "binar_test",
       instruction = "🔹 Display a confusion matrix of Mai_depression.b and Mai_anxiete.b.",
-      explanations = "Remember, you already used this function twice ! And you can use the option deparse.level = 2 to see which column corresponds to which variable.",
+      explanations = "You need to use a simple function you already used twice ! And you can use the option deparse.level = 2 to see which column corresponds to which variable. (From here, you passed to the 2nd part of this tutorial, statistical test on binary variables. You can stop the tutorial and go back here using the sidebar.)",
       validation = function() {
         if (grepl("table", input$code_input)
             & grepl("Mai_depression\\.b", input$code_input)
@@ -1026,7 +1001,7 @@ server <- function(input, output, session) {
   output$code_input_ui <- renderUI({
     step <- current_step()
     rows <- ifelse(step > 5, 2, 1)  # Change X par le numéro de l'étape où il faut plus de place
-    textAreaInput("code_input", "Type your code here :", rows = rows)
+    textAreaInput("code_input", "Type your code here :", rows = rows, width = 1000)
   })
   
   # Affichage type "console"
@@ -1153,10 +1128,10 @@ server <- function(input, output, session) {
       if (validation_fn()) {
         if (steps[[step]]$instruction == "🔹 Let's create a binary variable, Mai_depression.b."){
           # Créer la nouvelle variable Mai_anxiete.b si l'étape de création de Mai_depression.b est réussie
-          df <- get(df_name(), envir = .GlobalEnv)  # Récupérer la dataframe
+          df <- get("data", envir = .GlobalEnv)  # Récupérer la dataframe
           df$Mai_anxiete.b <- ifelse(df$Mai_anxiete >= 2, 1, 0)
           df$Oct_anixete.b <- ifelse(df$Oct_anxiete >=2, 1, 0)
-          assign(df_name(), df, envir = .GlobalEnv) 
+          assign("data", df, envir = .GlobalEnv) 
         }
         validation_state_d$valid = T
         if(validation_state_q$valid){
@@ -1181,11 +1156,7 @@ server <- function(input, output, session) {
     validation_state_d$valid <- F
     if (step < length(steps)) {
       current_step(step + 1)
-      updateTextAreaInput(session, "code_input", value = "")  # Réinitialisation du champ
-      output$feedback <- renderText("")  # Effacer les messages
-      output$execution_output <- renderText("")
-      output$questionnaire_cl <- renderText("")
-      updateActionButton(session, "next_step", disabled = TRUE)  # Désactiver "Suivant"
+      delete_feedback()
     } else {
       output$instructions <- renderUI({
         HTML("<h3>🎉 Félicitations ! Vous avez terminé le tutoriel !</h3>")
@@ -1195,6 +1166,8 @@ server <- function(input, output, session) {
   
   observeEvent(input$intro, {
     current_step(2)
+    rm(list = ls(envir = .GlobalEnv), envir = .GlobalEnv)
+    delete_feedback()
   })
   
   find_idx <- function(name) {which(sapply(steps, function(step) !is.null(step$id) && step$id == name))}
@@ -1228,14 +1201,17 @@ server <- function(input, output, session) {
   
   observeEvent(input$binar_test, {
     current_step(binar_idx)
+    delete_feedback()
     initialize_data_if_needed()
   })
   observeEvent(input$continuous_test, {
     current_step(continuous_idx)
+    delete_feedback()
     initialize_data_if_needed()
   })
   observeEvent(input$lm, {
     current_step(lm_idx)
+    delete_feedback()
     initialize_data_if_needed()
   })
   
